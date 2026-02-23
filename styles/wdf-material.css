@@ -1,0 +1,187 @@
+.wdf-material {
+    font-family: 'Roboto', sans-serif;
+    background: #ffffff;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Spendenbetrag */
+.wdf-material input.wdf_pledge_amount {
+    width: 100%;
+    margin: 0 0 12px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+/* Belohnungen */
+.wdf-material .wdf_rewards {
+    list-style: none;
+    margin: 12px 0 0 0;
+    padding: 0;
+}
+
+.wdf-material .wdf_rewards .wdf_reward_item {
+    cursor: pointer;
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background 0.2s ease;
+}
+
+.wdf-material .wdf_rewards .wdf_reward_item:hover {
+    background: #f5f5f5;
+}
+
+/* Spenden-Button */
+.wdf-material .wdf_send_donation,
+.wdf-material .wdf_button {
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    background-color: #2196F3;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.wdf-material .wdf_send_donation:hover {
+    background: #1976D2;
+}
+
+/* Fortschrittsinformation */
+.wdf-material .wdf_progress_info {
+    margin: 12px 0;
+    font-style: italic;
+    font-size: 1.2em;
+}
+
+/* Belohnungsbeschreibung */
+.wdf-material .wdf_reward_description {
+    font-size: 16px;
+}
+
+/* Große Zahl */
+.wdf-material .wdf_big_num {
+    font-size: 2em;
+}
+
+/* Fortschrittsbalken */
+.wdf-material .ui-progressbar {
+    height: 8px;
+    margin: 12px 0 0 0;
+}
+
+/* Belohnungsauswahl-Titel */
+.wdf-material .wdf_choose_reward_title {
+    font-size: 2.5em;
+    margin-top: 15px;
+}
+
+/* Belohnungslimit */
+.wdf-material .wdf_reward_limit {
+    font-size: 14px;
+    font-weight: normal;
+    background: #f5f5f5;
+    display: inline-block;
+    padding: 4px 8px;
+    color: #000;
+    margin: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Belohnungslimit ausgeschöpft */
+.wdf-material .wdf_reward_limit_gone {
+    background: #ffcccb;
+}
+
+/* Gesamtzahl der Unterstützer und gesammelte Spenden nebeneinander anordnen */
+.wdf-material .wdf_total_backers, .wdf-material .wdf_amount_raised {
+    display: flex;
+    gap: 8px; /* oder ein Wert nach Geschmack */
+    justify-content: flex-start;
+    align-items: center;
+}
+/* Unterstützer & Betrag nebeneinander, Zahl vor Text */
+.wdf-material .wdf_total_backers,
+.wdf-material .wdf_amount_raised {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 0.5em;
+}
+.wdf-material .wdf_big_num {
+    font-size: 2em;
+    font-weight: bold;
+    margin-right: 0.3em;
+}
+.wdf-material .wdf_total_backers .wdf_big_num,
+.wdf-material .wdf_amount_raised .wdf_big_num {
+    order: -1; /* Zahl zuerst */
+}
+
+/* Währungssymbol im Input */
+.wdf-material .wdf_pledge_amount_wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.wdf-material .wdf_pledge_amount_wrapper .wdf_currency {
+    position: absolute;
+    left: 12px;
+    font-size: 1.1em;
+    color: #888;
+    pointer-events: none;
+}
+.wdf-material input.wdf_pledge_amount {
+    padding-left: 2em; /* Platz für Symbol */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Spendenbetrag-Beschriftung und Input nebeneinander */
+.wdf-material .wdf_pledge_label_input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1em;
+}
+.wdf-material .wdf_pledge_label_input label {
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+/* Zahlungsarten nebeneinander */
+.wdf-material .wdf_payment_methods {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 1em;
+}
+.wdf-material .wdf_payment_methods label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
+}
+
+/* Buttons nebeneinander */
+.wdf-material .wdf_send_donation,
+.wdf-material .wdf_button {
+    margin-right: 10px;
+    margin-bottom: 0;
+}
+
+/* Einmalig/Monatlich Auswahl nebeneinander */
+.wdf-material .wdf_recurring_options {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 1em;
+}
