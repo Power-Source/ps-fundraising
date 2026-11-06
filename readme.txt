@@ -204,4 +204,12 @@ Erstelle eine CSS-Datei und speichere sie im `/styles/` Ordner oder in `wp-conte
 
 == Changelog ==
 
+= 1.0.1 =
+* Überweisungsgateway überarbeitet: Bankverbindung und Verwendungszweck lassen sich konfigurieren; auf der Bestätigungsseite werden die Zahlungsdaten angezeigt.
+* Überweisungen erhalten den Status „Ausstehend“ und werden erst nach Zahlungseingang als abgeschlossen gezählt.
+* EPC-/SEPA-QR-Codes werden lokal aus den Zahlungsdaten erzeugt, ohne Bankdaten an einen externen QR-Dienst zu senden.
+* Stripe-Checkout und Webhook-Verarbeitung für erfolgreiche und unbezahlte Zahlungen vervollständigt.
+* PHP-8-Kompatibilität verbessert, unter anderem durch explizite Deklaration zuvor dynamischer Eigenschaften und Korrekturen an Status- und Prämienübergängen.
+* PHP- und Plattformanforderungen aktualisiert; Regressionstests für die Zahlungsabläufe ergänzt.
+
 = 1.0.0 =
