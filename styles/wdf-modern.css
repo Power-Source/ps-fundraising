@@ -1,0 +1,286 @@
+.wdf-modern {
+    --wdf-modern-primary: #176b5b;
+    --wdf-modern-primary-hover: #105347;
+    --wdf-modern-surface: #ffffff;
+    --wdf-modern-muted-surface: #f3f7f6;
+    --wdf-modern-text: #172622;
+    --wdf-modern-muted: #5b6d67;
+    --wdf-modern-border: #dce7e3;
+    --wdf-modern-radius: 16px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    color: var(--wdf-modern-text);
+    font-family: inherit;
+}
+
+.wdf-modern *,
+.wdf-modern *::before,
+.wdf-modern *::after {
+    box-sizing: border-box;
+}
+
+.wdf-modern.wdf_fundraiser_panel > div {
+    margin: 0 0 1.25rem;
+}
+
+.wdf-modern .wdf_campaign_stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.wdf-modern .wdf_campaign_stats .wdf_stat_card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    margin: 0;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid var(--wdf-modern-border);
+    border-radius: var(--wdf-modern-radius);
+    background: var(--wdf-modern-surface);
+    box-shadow: 0 4px 16px rgb(23 38 34 / 6%);
+}
+
+.wdf-modern .wdf_stat_card .wdf_big_num {
+    min-width: 0;
+    color: var(--wdf-modern-text);
+    font-size: clamp(1.65rem, 4vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.wdf-modern .wdf_stat_card p {
+    margin: 0;
+    color: var(--wdf-modern-muted);
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.wdf-modern .wdf_panel_progress_bar {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--wdf-modern-border);
+    border-radius: var(--wdf-modern-radius);
+    background: var(--wdf-modern-muted-surface);
+}
+
+.wdf-modern .wdf-progress {
+    min-height: 0.75rem;
+    border-radius: 999px;
+}
+
+.wdf-modern .wdf-progress__value {
+    border-radius: inherit;
+    background: var(--wdf-modern-primary);
+}
+
+.wdf-modern .wdf_checkout_form,
+.wdf-modern.wdf_checkout_form {
+    display: block !important;
+    width: 100%;
+    max-width: 48rem;
+    margin: 0;
+}
+
+.wdf-modern .wdf_rewards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid var(--wdf-modern-border);
+    border-radius: var(--wdf-modern-radius);
+    background: var(--wdf-modern-surface);
+    box-shadow: 0 4px 16px rgb(23 38 34 / 6%);
+}
+
+.wdf-modern .wdf_payment_options {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    margin: 0;
+}
+
+.wdf-modern .wdf_donate_button {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+.wdf-modern .wdf_gateway_choices {
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+.wdf-modern .wdf_pledge_label_input {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+}
+
+.wdf-modern .wdf_pledge_label_input label,
+.wdf-modern .wdf_payment_options_title {
+    margin: 0 0 0.5rem;
+    color: var(--wdf-modern-text);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.wdf-modern .wdf_pledge_amount_wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.wdf-modern .wdf_pledge_amount_wrapper .wdf_currency {
+    position: absolute;
+    left: 0.9rem;
+    color: var(--wdf-modern-muted);
+    pointer-events: none;
+}
+
+.wdf-modern input.wdf_pledge_amount {
+    width: 100%;
+    min-height: 3rem;
+    margin: 0;
+    padding: 0.65rem 0.9rem 0.65rem 2.25rem;
+    border: 1px solid var(--wdf-modern-border);
+    border-radius: var(--wdf-modern-radius);
+    background: var(--wdf-modern-surface);
+    color: var(--wdf-modern-text);
+    font: inherit;
+}
+
+.wdf-modern .wdf_recurring_holder {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+}
+
+.wdf-modern .wdf_recurring_label {
+    color: var(--wdf-modern-muted);
+}
+
+.wdf-modern .wdf_recurring_select {
+    max-width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 1px solid var(--wdf-modern-border);
+    border-radius: var(--wdf-modern-radius);
+    background-color: var(--wdf-modern-surface);
+    color: var(--wdf-modern-text);
+    font: inherit;
+}
+
+.wdf-modern .wdf_gateway_choices .wdf_payment_options {
+    align-items: center;
+    gap: 0.75rem 1rem;
+}
+
+.wdf-modern .wdf_gateway_choices .wdf_payment_options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    color: var(--wdf-modern-text);
+}
+
+.wdf-modern .wdf_gateway_choices input[type="radio"] {
+    accent-color: var(--wdf-modern-primary);
+}
+
+.wdf-modern .wdf_send_donation,
+.wdf-modern .wdf_button {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.75rem 1.25rem;
+    border: 0;
+    border-radius: var(--wdf-modern-radius);
+    background: var(--wdf-modern-primary);
+    box-shadow: none;
+    color: #ffffff;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    white-space: normal;
+    transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.wdf-modern .wdf_send_donation:hover,
+.wdf-modern .wdf_button:hover {
+    background: var(--wdf-modern-primary-hover);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.wdf-modern :focus-visible {
+    outline: 3px solid var(--wdf-modern-primary);
+    outline-offset: 3px;
+}
+
+.wdf-modern .wdf_reward_item {
+    margin: 0;
+    padding: 1rem;
+    border: 1px solid var(--wdf-modern-border);
+    border-radius: var(--wdf-modern-radius);
+    background: var(--wdf-modern-muted-surface);
+}
+
+.wdf-modern .wdf_reward_item + .wdf_reward_item {
+    margin-top: 0.75rem;
+}
+
+.wdf-modern .wdf_choose_reward_title {
+    margin: 0;
+    color: var(--wdf-modern-text);
+    font-size: 1.4rem;
+}
+
+.wdf-modern .wdf_time_left {
+    color: var(--wdf-modern-muted);
+}
+
+@media (max-width: 560px) {
+    .wdf-modern .wdf_campaign_stats {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.75rem;
+    }
+
+    .wdf-modern .wdf_panel_progress_bar {
+        grid-column: auto;
+    }
+
+    .wdf-modern .wdf_payment_options {
+        align-items: stretch;
+    }
+
+    .wdf-modern .wdf_send_donation,
+    .wdf-modern .wdf_button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wdf-modern .wdf_send_donation,
+    .wdf-modern .wdf_button,
+    .wdf-modern .wdf-progress__value {
+        transition: none;
+    }
+}

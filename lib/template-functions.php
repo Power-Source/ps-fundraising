@@ -54,7 +54,7 @@ if(!function_exists('wdf_fundraiser_page')) {
 
 if(!function_exists('wdf_fundraiser_panel')) {
 	function wdf_fundraiser_panel($echo = true, $post_id = '', $context = '', $args = array() ) {
-		global $post, $wdf_checkout_from_panel;
+		global $post;
 		if(isset($args['shortcode']) && $args['shortcode'] == true && isset($args['id']) && $args['id'] == $post->ID)
 			return false;
 
@@ -72,9 +72,10 @@ if(!function_exists('wdf_fundraiser_panel')) {
 		if(!$funder)
 			return false;
 
-		$style = ( isset($args['style']) && !empty($args['style']) ? $args['style'] : wdf_get_style($post_id) );
+		$style = ( isset($args['style']) && !empty($args['style']) ? wdf_normalize_style($args['style']) : wdf_get_style($post_id) );
 
-		$content .= '<div class="wdf_fundraiser_panel '.$style.'">';
+		$style_class = ($style != 'wdf-modern' ? ' '.sanitize_html_class($style) : '');
+		$content .= '<div class="wdf_fundraiser_panel wdf-modern'.$style_class.'">';
 
 		if(isset($args['shortcode']) && $args['shortcode'] == true) {
 			if( isset($args['show_title']) && strtolower($args['show_title']) == 'yes' )
@@ -86,21 +87,22 @@ if(!function_exists('wdf_fundraiser_panel')) {
 				$content .= sprintf( apply_filters( 'wdf_fundaiser_panel_shortcode_content', '<div class="wdf_shortcode_content">%s</div>'), $funder_content );
 			}
 		}
+		$content .= '<div class="wdf_campaign_stats">';
+
 		$backer_total = wdf_total_backers(false, $post_id);
-		$content .= '<div class="wdf_total_backers"><div class="wdf_big_num">'.$backer_total.'</div><p>'.apply_filters('wdf_backer_label', ($backer_total > 1 ? esc_attr($settings['donation_labels']['backer_plural']) : esc_attr($settings['donation_labels']['backer_single'])) ).'</p></div>';
+		$content .= '<div class="wdf_total_backers wdf_stat_card"><div class="wdf_big_num">'.$backer_total.'</div><p>'.apply_filters('wdf_backer_label', ($backer_total > 1 ? esc_attr($settings['donation_labels']['backer_plural']) : esc_attr($settings['donation_labels']['backer_single'])) ).'</p></div>';
 		if(wdf_has_goal($post_id)) {
-			$content .= '<div class="wdf_amount_raised"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.sprintf(__('insgesamt erhalten, von einem Ziel von %s','wdf'),wdf_goal(false, $post_id)).'</p></div>';
+			$content .= '<div class="wdf_amount_raised wdf_stat_card"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.sprintf(__('insgesamt erhalten, von einem Ziel von %s','wdf'),wdf_goal(false, $post_id)).'</p></div>';
 			$content .= '<div class="wdf_panel_progress_bar">'.wdf_progress_bar(false, $post_id).'</div>';
 		} else {
-			$content .= '<div class="wdf_amount_raised"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.__('insgesamt erhalten','wdf').'</p></div>';
+			$content .= '<div class="wdf_amount_raised wdf_stat_card"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.__('insgesamt erhalten','wdf').'</p></div>';
 		}
+		$content .= '</div>';
 
 		// Checking to see if this fundraiser can accept pledges.
 		$fundraising_active = wdf_time_left(false, $post_id, true);
 
 		if(wdf_panel_checkout($post_id)) {
-			$wdf_checkout_from_panel = true;
-
 			if( $fundraising_active !== false ) {
 				$content .= wdf_checkout_page(false, $post_id);
 			}
@@ -420,7 +422,7 @@ if(!function_exists('wdf_get_style')) {
 			$style = ($meta != false ? $meta : $settings['default_style'] );
 		}
 
-		return $style;
+		return wdf_normalize_style($style);
 	}
 }
 
@@ -627,7 +629,7 @@ if(!function_exists('wdf_gateway_choices')) {
 
 if(!function_exists('wdf_checkout_page')) {
 	function wdf_checkout_page( $echo = true, $post_id = '' ) {
-		global $wdf_checkout_from_panel, $wdf, $post; $content = '';
+		global $wdf, $post; $content = '';
 		$post_id = (empty($post_id) ? $post->ID : $post_id );
 		if(!get_post($post_id))
 			return false;
@@ -637,10 +639,10 @@ if(!function_exists('wdf_checkout_page')) {
 
 		$wdf->front_scripts($post_id);
 
-		$style = ($wdf_checkout_from_panel == true ? '' : wdf_get_style($post_id) );
 		$style = wdf_get_style($post_id);
+		$style_class = ($style != 'wdf-modern' ? ' '.sanitize_html_class($style) : '');
 
-		$content .= '<form style="display: inline-block" class="wdf_checkout_form '.$style.'" action="'.wdf_get_funder_page('checkout',$post_id).'" method="post">';
+		$content .= '<form class="wdf_checkout_form wdf-modern'.$style_class.'" action="'.wdf_get_funder_page('checkout',$post_id).'" method="post">';
 			global $wp_filter;
 			$raised = $wdf->get_amount_raised($post_id);
 			//$goal = $meta['wdf_goal_amount'][0];

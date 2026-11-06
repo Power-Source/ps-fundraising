@@ -318,7 +318,7 @@ if($pagenow == 'nav-menus.php') { ?>
                         <select name="wdf[style]">
                             <?php if(is_array($this->styles) && !empty($this->styles)) : ?>
                                 <?php foreach($this->styles as $key => $label) : ?>
-                                    <option <?php (isset($meta['wdf_style'][0]) ? selected($meta['wdf_style'][0],$key) : ''); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
+                                    <option <?php (isset($meta['wdf_style'][0]) ? selected(wdf_normalize_style($meta['wdf_style'][0]),$key) : ''); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select></label>

@@ -227,6 +227,7 @@ if (!class_exists('Psource_HelpTooltips')) require_once WDF_PLUGIN_BASE_DIR . '/
 										</th>
 										<td>
 											<textarea rows="15" class="widefat" id="wdf_custom_css" name="wdf_settings[custom_css]"><?php echo esc_attr($settings['custom_css']); ?></textarea>
+											<p class="description"><?php _e('Das moderne Kampagnendesign lässt sich über CSS-Variablen anpassen, zum Beispiel: .wdf-modern { --wdf-modern-primary: #176b5b; --wdf-modern-radius: 16px; }','wdf'); ?></p>
 										</td>
 									</tr>
 

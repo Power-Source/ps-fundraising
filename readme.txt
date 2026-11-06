@@ -2,9 +2,10 @@
 Contributors: DerN3rd (PSOURCE)
 Tags: fundraising, spenden, crowdfunding, donations, fundraiser, kickstarter, indiegogo
 Requires at least: 4.9
+Requires CP: 2.7
 Requires PHP: 8.0
 Tested up to: 7.2.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 

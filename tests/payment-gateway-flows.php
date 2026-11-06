@@ -62,8 +62,12 @@ namespace {
     }
 
     function add_action() {}
+    function add_shortcode() {}
     function remove_filter() {}
     function wdf_register_gateway_plugin() {}
+    function sanitize_html_class($class) {
+        return preg_replace('/[^A-Za-z0-9_-]/', '', $class);
+    }
     function get_option($name) {
         global $test_options;
         return isset($test_options[$name]) ? $test_options[$name] : false;
@@ -137,6 +141,11 @@ namespace {
     require_once dirname(__DIR__) . '/lib/gateways/stripe.php';
     require_once dirname(__DIR__) . '/lib/gateways/paypal.php';
     require_once dirname(__DIR__) . '/lib/gateways/manual.php';
+    require_once dirname(__DIR__) . '/lib/style-functions.php';
+    require_once dirname(__DIR__) . '/lib/template-functions.php';
+
+    assert_same('wdf-modern', wdf_normalize_style('wdf-note'), 'Legacy fundraiser styles use the modern layout');
+    assert_same('wdf-modern', wdf_normalize_style('wdf-modern'), 'Modern fundraiser style remains selected');
 
     class VerifiedPayPalGateway extends \WDF_Gateway_PayPal {
         public function verify_paypal() {

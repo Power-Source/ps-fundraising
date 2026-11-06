@@ -1,16 +1,16 @@
 <?php
 /*
 Plugin Name: PS Fundraising
-Plugin URI: https://cp-psource.github.io/ps-fundraising/
+Plugin URI: https://psource.eimen.net/psource/ps-fundraising/
 Description: Erstelle eine Spendenseite für jeden Zweck oder jedes Projekt.
-Version: 1.0.0
+Version: 1.0.1
 Text Domain: wdf
 Author: PSOURCE
 Domain Path: /languages
-Author URI: https://nerdservice-eimen.net
+Author URI: https://nerdservice.eimen.net
 
 
-Copyright 2020-2025 DerN3rd (https://nerdservice-eimen.net)
+Copyright 2020-2025 DerN3rd (https://nerdservice.eimen.net)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License (Version 2 - GPLv2) as published by
@@ -90,6 +90,7 @@ add_action('plugins_loaded', function() use ($textdomain_handler) {
 });
 
 define ('WDF_PLUGIN_URL', plugins_url('', __FILE__ ));
+require_once WDF_PLUGIN_BASE_DIR . '/lib/style-functions.php';
 
 
 // Gotta do this here so it doesnt save over what we just deleted.
@@ -127,7 +128,7 @@ class WDF {
 	public $wdf_msg = false;
 
 	function _vars() {
-		$this->version = '1.0.0';
+		$this->version = '1.0.1';
 		$this->defaults = array(
 			'currency' => 'EUR',
 			'dir_slug' => 'spendenaktionen',
@@ -141,7 +142,7 @@ class WDF {
 			'custom_css' => '',
 			'message_pledge_not_found' => '',
 			'first_time' => 1,
-			'default_style' => 'wdf-basic',
+			'default_style' => 'wdf-modern',
 			'panel_in_sidebar' => 'no',
 			'payment_types' => array('simple'),
 			'curr_symbol_position' => 1,
@@ -792,22 +793,14 @@ class WDF {
 					//$string = file_get_contents($style_dir.$style,null,null,null,100);
 						switch($file) {
 							case 'wdf-basic.css' :
-								$styles['wdf-basic'] = __('Basis','wdf');
-								break;
 							case 'wdf-dark.css' :
-								$styles['wdf-dark'] = __('Dunkel','wdf');
-								break;
 							case 'wdf-fresh.css' :
-								$styles['wdf-fresh'] = __('Frisch','wdf');
-								break;
 							case 'wdf-minimal.css' :
-								$styles['wdf-minimal'] = __('Minimal','wdf');
-								break;
 							case 'wdf-note.css' :
-								$styles['wdf-note'] = __('Notiz','wdf');
-								break;
 							case 'wdf-material.css' :
-								$styles['wdf-material'] = __('Material','wdf');
+								break;
+							case 'wdf-modern.css' :
+								$styles['wdf-modern'] = __('Modern','wdf');
 								break;
 							default :
 								if(preg_match('/.css/',$file) ) {
@@ -823,8 +816,10 @@ class WDF {
 		$this->styles = $styles;
 	}
 	function load_style($style = false) {
-		if($style != false)
+		if($style != false) {
+			$style = wdf_normalize_style($style);
 			wp_enqueue_style('wdf-style-'.$style);
+		}
 	}
 	function front_scripts($id = NULL, $add_style = false) {
 		wp_enqueue_script('jquery');
@@ -836,6 +831,7 @@ class WDF {
         add_action('wp_footer', array(&$this,'inject_javascript'));
 		// $add_style will always be used before a saved style.
 		if($add_style != false) {
+			$add_style = wdf_normalize_style($add_style);
 			wp_enqueue_style('wdf-style-'.$add_style);
 		} else if(!empty($id) && $style = $this->get_style($id))
 			wp_enqueue_style('wdf-style-'.$style);
@@ -843,18 +839,7 @@ class WDF {
 		wp_localize_script( 'wdf-base', 'wdf', array('ajaxurl' => admin_url('admin-ajax.php')) );
 	}
 	function get_style( $post_id = '' ) {
-		global $post;
-		$settings = get_option('wdf_settings');
-		$post_id = (empty($post_id) ? $post->ID : $post_id );
-
-		if( $settings['single_styles'] == 'no' ) {
-			$style = $settings['default_style'];
-		} else {
-			$meta = get_post_meta($post_id,'wdf_style',true);
-			$style = ($meta != false ? $meta : $settings['default_style'] );
-		}
-
-		return $style;
+		return wdf_get_style($post_id);
 	}
 	function inject_custom_css() {
 		$settings = get_option('wdf_settings');
@@ -1706,7 +1691,7 @@ class WDF {
 										<?php if(is_array($this->styles) && !empty($this->styles)) : ?>
 											<option value="0"><?php _e('Standard','wdf'); ?></option>
 											<?php foreach($this->styles as $key => $label) : ?>
-												<option <?php selected($settings['default_style'],$key); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
+												<option <?php selected(wdf_normalize_style($settings['default_style']),$key); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
 											<?php endforeach; ?>
 										<?php endif; ?>
 									</select>
@@ -1769,7 +1754,7 @@ class WDF {
 									<select name="style">
 										<?php if(is_array($this->styles) && !empty($this->styles)) : ?>
 											<?php foreach($this->styles as $key => $label) : ?>
-												<option <?php selected($settings['default_style'],$key); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
+												<option <?php selected(wdf_normalize_style($settings['default_style']),$key); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
 											<?php endforeach; ?>
 										<?php endif; ?>
 									</select>
@@ -1853,7 +1838,7 @@ class WDF {
 										<?php if(is_array($this->styles) && !empty($this->styles)) : ?>
 											<option value="0"><?php _e('Standard','wdf'); ?></option>
 											<?php foreach($this->styles as $key => $label) : ?>
-												<option <?php selected($settings['default_style'],$key); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
+												<option <?php selected(wdf_normalize_style($settings['default_style']),$key); ?> value="<?php echo $key ?>"><?php echo $label; ?></option>
 											<?php endforeach; ?>
 										<?php endif; ?>
 									</select>
