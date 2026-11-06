@@ -1,9 +1,9 @@
 === PS Fundraising ===
 Contributors: DerN3rd (PSOURCE)
 Tags: fundraising, spenden, crowdfunding, donations, fundraiser, kickstarter, indiegogo
-Requires at least: 4.0
-Requires PHP: 5.4+
-Tested up to: 6.x
+Requires at least: 4.9
+Requires PHP: 8.0
+Tested up to: 7.2.4
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -74,9 +74,9 @@ Die Einrichtung ist unkompliziert:
 
 == Anforderungen ==
 
-* ClassicPress 2.0+
+* ClassicPress 2.7+
 * WordPress 4.9+ 
-* PHP 7.2+
+* PHP 8.0+
 * Ein PayPal oder Stripe Konto für Zahlungsverarbeitung
 
 == Entwickler ==
@@ -205,4 +205,3 @@ Erstelle eine CSS-Datei und speichere sie im `/styles/` Ordner oder in `wp-conte
 == Changelog ==
 
 = 1.0.0 =
-

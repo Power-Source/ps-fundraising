@@ -3,25 +3,25 @@ if(!class_exists('WDF_Gateway_Manual')) {
 	class WDF_Gateway_Manual extends WDF_Gateway {
 
 		// Private gateway slug. Lowercase alpha (a-z) and dashes (-) only please!
-		var $plugin_name = 'manual';
+		public $plugin_name = 'manual';
 
 		// Name of your gateway, for the admin side.
-		var $admin_name = '';
+		public $admin_name = '';
 
 		// Public name of your gateway, for lists and such.
-		var $public_name = '';
+		public $public_name = '';
 
 		// Whether or not ssl is needed for checkout page
-		var $force_ssl = false;
+		public $force_ssl = false;
 
 		// An array of allowed payment types (simple, advanced)
-		var $payment_types = 'simple';
+		public $payment_types = 'simple';
 
 		// If you are redirecting to a 3rd party make sure this is set to true
-		var $skip_form = false;
+		public $skip_form = false;
 
 		// Allow recurring payments with your gateway
-		var $allow_reccuring = false;
+		public $allow_reccuring = false;
 
 		function on_creation() {
 			$this->public_name = $this->admin_name = __('Überweisung','wdf');

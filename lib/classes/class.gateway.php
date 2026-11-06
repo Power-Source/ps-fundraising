@@ -8,27 +8,28 @@ if(!class_exists('WDF_Gateway')) {
 	class WDF_Gateway {
 
 		public $ipn_url = '';
+		public $return_url = '';
 
 		//private gateway slug. Lowercase alpha (a-z) and dashes (-) only please!
-			var $plugin_name = '';
+			public $plugin_name = '';
 
 		//name of your gateway, for the admin side.
-			var $admin_name = '';
+			public $admin_name = '';
 
 		//public name of your gateway, for lists and such.
-			var $public_name = '';
+			public $public_name = '';
 
 		//whether or not ssl is needed for checkout page
-			var $force_ssl = false;
+			public $force_ssl = false;
 
 		//only required for global capable gateways. The maximum stores that can checkout at once
-			var $payment_types = array();
+			public $payment_types = array();
 
 		// If you are redirecting to a 3rd party make sure this is set to true
-			var $skip_form = false;
+			public $skip_form = false;
 
 		// Allow recurring payments with your gateway
-			var $allow_reccuring = false;
+			public $allow_reccuring = false;
 
 		function on_creation() {
 			wp_die( __("You must override the on_creation() method in your payment gateway plugin!", 'wdf') );

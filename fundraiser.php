@@ -119,6 +119,12 @@ class WDF {
 	private $canadian_provinces;
 	private $eu_countries;
 	private $currencies;
+	public $is_funder_checkout = false;
+	public $is_funder_confirm = false;
+	public $is_funder_single = false;
+	public $funder_template = '';
+	public $wdf_error = false;
+	public $wdf_msg = false;
 
 	function _vars() {
 		$this->version = '1.0.0';
@@ -1283,9 +1289,10 @@ class WDF {
 
 	function create_error($msg, $context) {
 		$classes = 'error';
-		$content = 'return $content."<div class=\"'.$classes.'\"><p>' . esc_html( $msg ) . '</p></div>";';
-		//add_filter('wdf_error_' . $context, create_function('$content', $content));
-		add_filter('wdf_error_' . $context, function($content) {$content;});
+		$markup = '<div class="' . $classes . '"><p>' . esc_html( $msg ) . '</p></div>';
+		add_filter('wdf_error_' . $context, function($content) use ($markup) {
+			return $content . $markup;
+		});
 		$this->wdf_error = true;
 	}
 
@@ -1294,10 +1301,10 @@ class WDF {
 			$classes = 'updated below-h2';
 		else
 			$classes = 'wdf_msg';
-		$content = 'echo "<div class=\"'.$classes.'\"><p>' . $msg . '</p></div>";';
-		//add_filter('wdf_msg_' . $context, create_function('', $content));
-		add_filter('wdf_msg_' . $context, function() {$content;});
-		//add_action('wdf_msg_' . $context, create_function('', $content));
+		$markup = '<div class="' . $classes . '"><p>' . wp_kses_post($msg) . '</p></div>';
+		add_action('wdf_msg_' . $context, function() use ($markup) {
+			echo $markup;
+		});
 		$this->wdf_msg = true;
 	}
 

@@ -12,25 +12,25 @@ if(!class_exists('WDF_Gateway_PayPal')) {
 		private $appId = '';
 
 		// Private gateway slug. Lowercase alpha (a-z) and dashes (-) only please!
-		var $plugin_name = 'paypal';
+		public $plugin_name = 'paypal';
 
 		// Name of your gateway, for the admin side.
-		var $admin_name = '';
+		public $admin_name = '';
 
 		// Public name of your gateway, for lists and such.
-		var $public_name = '';
+		public $public_name = '';
 
 		// Whether or not ssl is needed for checkout page
-		var $force_ssl = false;
+		public $force_ssl = false;
 
 		// An array of allowed payment types (simple, advanced)
-		var $payment_types = 'simple, advanced';
+		public $payment_types = 'simple, advanced';
 
 		// If you are redirecting to a 3rd party make sure this is set to true
-		var $skip_form = true;
+		public $skip_form = true;
 
 		// Allow recurring payments with your gateway
-		var $allow_reccuring = true;
+		public $allow_reccuring = true;
 
 		function skip_form() {
 			if(isset($_SESSION['funder_id'])) {

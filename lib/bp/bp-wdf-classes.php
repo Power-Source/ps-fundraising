@@ -22,11 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 
 class BP_WDF_Donation {
-	var $id;
-	var $funder_id;
-	var $recipient_id;
-	var $date;
-	var $query;
+	public $id;
+	public $funder_id;
+	public $recipient_id;
+	public $date;
+	public $query;
+	public $pag_links;
 
 	/**
 	 * bp_wdf_tablename()
