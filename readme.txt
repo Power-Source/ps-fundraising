@@ -214,3 +214,4 @@ Erstelle eine CSS-Datei und speichere sie im `/styles/` Ordner oder in `wp-conte
 * PHP- und Plattformanforderungen aktualisiert; Regressionstests für die Zahlungsabläufe ergänzt.
 
 = 1.0.0 =
+* Release

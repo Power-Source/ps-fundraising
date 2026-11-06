@@ -10,7 +10,7 @@ Domain Path: /languages
 Author URI: https://nerdservice.eimen.net
 
 
-Copyright 2020-2025 DerN3rd (https://nerdservice.eimen.net)
+Copyright 2020-2026 DerN3rd (https://nerdservice.eimen.net)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License (Version 2 - GPLv2) as published by
