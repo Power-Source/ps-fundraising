@@ -29,7 +29,7 @@
 #icon-edit {
 	background: url(../img/icon_32.png);
 }
-.wdf_goal_progress.column.ui-progressbar {
+.wdf_goal_progress.column.wdf-progress {
 	width: 122px;
 	height: 17px;
 }
@@ -137,7 +137,7 @@ th.wdf_level_reward {
 td.column-funder_raised .wdf_complete {
 	font-weight: bold;
 }
-#wdf_progress .ui-progressbar-value.wdf_complete {
+#wdf_progress .wdf-progress__value.wdf_complete {
 
 }
 #wdf_steps li {

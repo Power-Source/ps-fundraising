@@ -73,7 +73,7 @@
 }
 
 /* Fortschrittsbalken */
-.wdf-material .ui-progressbar {
+.wdf-material .wdf-progress {
     height: 8px;
     margin: 12px 0 0 0;
 }

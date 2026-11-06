@@ -428,10 +428,10 @@ if($pagenow == 'nav-menus.php') { ?>
                     <tr>
 
                         <td class="wdf_goal_start_date">
-                            <input <?php echo $disabled; ?> id="wdf_goal_start_date" style="background-image: url(<?php echo admin_url('images/date-button.gif'); ?>);" type="text" name="wdf[goal_start]" class="wdf_biginput" value="<?php echo (isset($meta['wdf_goal_start'][0]) ? $meta['wdf_goal_start'][0] : ''); ?>" />
+                            <input <?php echo $disabled; ?> id="wdf_goal_start_date" type="date" name="wdf[goal_start]" class="wdf_biginput" value="<?php echo (isset($meta['wdf_goal_start'][0]) ? $meta['wdf_goal_start'][0] : ''); ?>" />
                         </td>
                         <td class="wdf_goal_end_date">
-                            <input <?php echo $disabled; ?> id="wdf_goal_end_date" style="background-image: url(<?php echo admin_url('images/date-button.gif'); ?>);" type="text" name="wdf[goal_end]" class="wdf_biginput" value="<?php echo (isset($meta['wdf_goal_end'][0]) ? $meta['wdf_goal_end'][0] : ''); ?>" />
+                            <input <?php echo $disabled; ?> id="wdf_goal_end_date" type="date" name="wdf[goal_end]" class="wdf_biginput" value="<?php echo (isset($meta['wdf_goal_end'][0]) ? $meta['wdf_goal_end'][0] : ''); ?>" />
                         </td>
                         <td class="wdf_goal_amount">
                             <?php echo ( (isset($settings['curr_symbol_position'])) && $settings['curr_symbol_position'] == 1 || $settings['curr_symbol_position'] == 2 ? '<span class="wdf_bignum wdf_disabled">'.$this->format_currency().'</span>' : ''); ?>

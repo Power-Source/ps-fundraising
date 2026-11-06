@@ -112,7 +112,7 @@
     font-size: 2em;
 }
 
-.wdf-note .ui-progressbar {
+.wdf-note .wdf-progress {
     height: 1em;
     margin: 10px 0 0 0;
 }
@@ -147,7 +147,7 @@
     margin-top: 15px;
 }
 
-.wdf-note .ui-progressbar {
+.wdf-note .wdf-progress {
     height: 1em;
     margin: 10px 0 0 0;
 }

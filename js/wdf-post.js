@@ -20,12 +20,6 @@ jQuery(document).ready(function($) {
     });
 
 
-    var dates = $("#wdf_goal_start_date, #wdf_goal_end_date").datepicker({
-        dateFormat: 'yy-mm-dd',
-        changeMonth: true,
-        numberOfMonths: 2,
-    });
-
     //$('.wdf_level .wdf_check_switch').live('change', function(e) {
     //	if($(this).is(':checked')) {
     //		$(this).parents('.wdf_level').next('tr').find('div.wdf_reward_toggle').slideDown(400);
@@ -98,12 +92,14 @@ jQuery(document).ready(function($) {
         $(this).find('td:last a').hide();
     });
 
-    // Progress bar initialization
-    $('.wdf_goal_progress').progressbar({
-        value: 0,
-        create: function() {
-            $(this).progressbar("option", "value", Math.round(parseInt($(this).attr('total') * 100) / parseInt($(this).attr('goal'))));
-        }
+    $('.wdf_goal_progress').each(function() {
+        var progress = $(this);
+        var goal = parseInt(progress.attr('goal'), 10);
+        var total = parseInt(progress.attr('total'), 10);
+        var value = goal > 0 ? Math.min(100, Math.round(total * 100 / goal)) : 0;
+        progress.attr({role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': value});
+        progress.html('<span class="wdf-progress__value"></span>');
+        progress.find('.wdf-progress__value').css('width', value + '%');
     });
 
     function fixInputs() {

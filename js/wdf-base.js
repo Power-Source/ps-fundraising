@@ -12,15 +12,14 @@ jQuery.fn.bullseye = function (b, h) { b = jQuery.extend({ offsetTop: 0, offsetH
 })(jQuery);
 
 jQuery(document).ready( function($) {
-	var prog_default = {
-		value: 0,
-		create: function() {
-			var value = Math.round( parseInt( $(this).attr('total') * 100) ) / parseInt( $(this).attr('goal') );
-			if(value > 100) { value = 100 }
-			$(this).find('.ui-progressbar-value').animate({ width: value + '%'},4000,'swing');
-			$(this).progressbar( "option", "value", value);
-		}
-	};
+	$('.wdf_goal_progress').each(function() {
+		var progress = $(this);
+		var goal = parseInt(progress.attr('goal'), 10);
+		var total = parseInt(progress.attr('total'), 10);
+		var value = goal > 0 ? Math.min(100, Math.round(total * 100 / goal)) : 0;
+		progress.attr({role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': value});
+		progress.html('<span class="wdf-progress__value"></span>');
+	});
 
 	$('.wdf_rewards .wdf_reward_item').on('click', function(e) {
 		var _this = $(this);
@@ -45,13 +44,13 @@ jQuery(document).ready( function($) {
 		_this.find('input:radio').prop('checked', true);
 	});
 
-	$('.wdf_goal_progress').progressbar(prog_default).on('enterviewport', function() {
+	$('.wdf_goal_progress').on('enterviewport', function() {
 		if($(this).hasClass('not-seen')) {
-			var value = Math.round( parseInt( $(this).attr('total') * 100) ) / parseInt( $(this).attr('goal') );
-			if(value > 100) { value = 100 }
-			$(this).find('.ui-progressbar-value').width(0).animate({ width: value + '%'},4000,'swing');
+			var goal = parseInt($(this).attr('goal'), 10);
+			var total = parseInt($(this).attr('total'), 10);
+			var value = goal > 0 ? Math.min(100, Math.round(total * 100 / goal)) : 0;
+			$(this).find('.wdf-progress__value').css('width', value + '%');
 			$(this).removeClass('not-seen').addClass('seen');
-			$(this).progressbar( "option", "value", value);
 		} else {
 			//Do Nothing
 		}

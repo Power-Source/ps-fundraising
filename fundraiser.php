@@ -811,10 +811,9 @@ class WDF {
 	}
 	function front_scripts($id = NULL, $add_style = false) {
 		wp_enqueue_script('jquery');
-		wp_enqueue_script('jquery-ui-progressbar');
 		wp_enqueue_script('wdf-base');
 		wp_enqueue_script('thickbox');
-		wp_enqueue_style('jquery-ui-base');
+		wp_enqueue_style('wdf-progress');
 
 		add_action('wp_head', array(&$this,'inject_custom_css'));
         add_action('wp_footer', array(&$this,'inject_javascript'));
@@ -1411,7 +1410,7 @@ class WDF {
 	}
 	function enqueue_scripts() {
 		wp_register_script( 'wdf-base', WDF_PLUGIN_URL . '/js/wdf-base.js', array('jquery'), $this->version, false );
-		wp_register_style( 'jquery-ui-base', WDF_PLUGIN_URL . '/css/jquery-ui.css', null, null, 'screen' );
+		wp_register_style( 'wdf-progress', WDF_PLUGIN_URL . '/css/wdf-progress.css', array(), $this->version, 'screen' );
 		if(is_array($this->styles) && !empty($this->styles)) {
 			foreach($this->styles as $key => $label) {
 				wp_register_style( 'wdf-style-'.$key, WDF_PLUGIN_URL . '/styles/'.$key.'.css', null, $this->version );
@@ -1426,9 +1425,8 @@ class WDF {
 	function admin_enqueue_scripts($hook) {
 		global $typenow, $pagenow, $wp_version;
 
-		// Google external jQuery UI
-		wp_register_style( 'jquery-ui-base', WDF_PLUGIN_URL . '/css/jquery-ui.css', null, null, 'screen' );
 		wp_register_style( 'wdf-admin', WDF_PLUGIN_URL . '/css/wdf-admin.css', null, $this->version, 'all' );
+		wp_register_style( 'wdf-progress', WDF_PLUGIN_URL . '/css/wdf-progress.css', array(), $this->version, 'screen' );
 
 		if ( $wp_version >= 3.8 ) {
 			wp_register_style( 'wdf-mp6', WDF_PLUGIN_URL . '/css/wdf-mp6.css', null, $this->version, 'all' );
@@ -1443,13 +1441,12 @@ class WDF {
 
 
 		if($typenow == 'funder' || $pagenow == 'admin.php') {
-			if($typenow == 'funder' || $_GET['page'] == 'wdf' || $_GET['page'] == 'wdf_settings')
+			if($typenow == 'funder' || $_GET['page'] == 'wdf' || $_GET['page'] == 'wdf_settings') {
 				wp_enqueue_style('wdf-admin');
+				wp_enqueue_style('wdf-progress');
+			}
 			if( $hook === 'post.php' || $hook === 'post-new.php') {
-				wp_enqueue_style('jquery-ui-base');
-				wp_enqueue_script('jquery-ui-progressbar');
 				wp_enqueue_style('wdf-admin');
-				wp_enqueue_script('jquery-ui-datepicker');
 				wp_enqueue_script('wdf-post');
 
 				$translation_array = array(
@@ -1457,8 +1454,6 @@ class WDF {
 				);
 				wp_localize_script( 'wdf-post', 'wdf', $translation_array );				
 			} elseif( $hook == 'edit.php') {
-				wp_enqueue_style('jquery-ui-base');
-				wp_enqueue_script('jquery-ui-progressbar');
 				wp_enqueue_script('wdf-edit');
 			}
 		} elseif( $typenow == 'donation' ) {
@@ -2002,7 +1997,7 @@ class WDF {
 				$content .= '<div class="wdf_progress_shortcode_title">'.get_the_title($post_id).'</div>';
 				$content .= '<div class="'.$classes.'">' . $this->format_currency('',$total) . ' / ' . $this->format_currency('',$goal) . '</div>';
 			}
-			$content .= '<div rel="'.$post_id.'" class="wdf_goal_progress '.$classes.' not-seen '.$context.'" total="'.$total.'" goal="'.$goal.'"></div>';
+			$content .= '<div rel="'.$post_id.'" class="wdf_goal_progress wdf-progress '.$classes.' not-seen '.$context.'" total="'.$total.'" goal="'.$goal.'"></div>';
 		}
 		if($echo) {echo $content;} else {return $content;}
 	}

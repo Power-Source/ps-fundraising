@@ -1,0 +1,15 @@
+.wdf-progress {
+	background: #dcdcde;
+	border-radius: 3px;
+	overflow: hidden;
+	position: relative;
+}
+
+.wdf-progress__value {
+	background: #2271b1;
+	display: block;
+	height: 100%;
+	min-height: inherit;
+	transition: width 1s ease;
+	width: 0;
+}

@@ -113,7 +113,7 @@
     font-weight: bold;
 }
 
-.wdf-dark .ui-progressbar {
+.wdf-dark .wdf-progress {
     height: 1em;
     margin: 10px 0 0 0;
 }
@@ -148,7 +148,7 @@
     margin-top: 15px;
 }
 
-.wdf-dark .ui-progressbar {
+.wdf-dark .wdf-progress {
     height: 1em;
     margin: 10px 0 0 0;
     background: #444;
