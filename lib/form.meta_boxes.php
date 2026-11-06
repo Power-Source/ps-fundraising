@@ -36,6 +36,7 @@ if($pagenow == 'nav-menus.php') { ?>
             <p>
                 <label><?php _e('Unterstützung Status','wdf'); ?></label><br />
                 <select class="widefat" name="post_status">
+                    <option value="wdf_pending" <?php selected($post->post_status,'wdf_pending'); ?>><?php _e('Ausstehend','wdf'); ?></option>
                     <option value="wdf_complete" <?php selected($post->post_status,'wdf_complete'); ?>><?php _e('Komplett','wdf'); ?></option>
                     <option value="wdf_approved" <?php selected($post->post_status,'wdf_approved'); ?>><?php _e('Genehmigt','wdf'); ?></option>
                     <option value="wdf_refunded" <?php selected($post->post_status,'wdf_refunded'); ?>><?php _e('Rückerstattet','wdf'); ?></option>

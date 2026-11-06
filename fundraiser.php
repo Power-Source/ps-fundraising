@@ -426,6 +426,16 @@ class WDF {
 			'show_in_admin_all_list' => true,
 			'show_in_admin_all' => true
 		);
+		$pending_args = array(
+			'label'       => __('Ausstehend', 'wdf'),
+			'label_count' => _n_noop('Ausstehend <span class="count">(%s)</span>', 'Ausstehende <span class="count">(%s)</span>'),
+			'post_type'   => 'donation',
+			'private'      => true,
+			'exclude_from_search' => true,
+			'show_in_admin_status_list' => true,
+			'show_in_admin_all_list' => true,
+			'show_in_admin_all' => true
+		);
 		$canceled_args = array(
 			'label'       => __('Abgebrochen', 'wdf'),
 			'label_count' =>  _n_noop( 'Abgebrochen <span class="count">(%s)</span>', 'Abgebrochene <span class="count">(%s)</span>' ),
@@ -451,6 +461,7 @@ class WDF {
 		register_post_status('wdf_refunded', $refunded_args);
 		register_post_status('wdf_approved', $approved_args);
 		register_post_status('wdf_complete', $complete_args);
+		register_post_status('wdf_pending', $pending_args);
 
 		$pledges = wp_count_posts('donation');
 		if($pledges->publish > 0 || $pledges->draft > 0 ) {
@@ -1088,7 +1099,7 @@ class WDF {
         update_post_meta($id, 'wdf_transaction', $transaction);
         update_post_meta($id,'wdf_native', '1');
 
-        if(isset($transaction['reward']) && ($status == 'wdf_complete' && $status == 'wdf_approved')) {
+        if(!empty($transaction['reward']) && !$pledge_exists && in_array($status, array('wdf_complete', 'wdf_approved'), true)) {
             $rewards = get_post_meta($funder_id,'wdf_levels', true);
             if(isset($rewards[$transaction['reward']-1]['used']) && is_numeric($rewards[$transaction['reward']-1]['used']))
                 $rewards[$transaction['reward']-1]['used'] ++;
@@ -1375,29 +1386,32 @@ class WDF {
 		}
 	}
 	function rewards_update($new_status, $old_status, $post) {
-		if(($old_status == 'wdf_complete' || $old_status == 'wdf_approved') && ($new_status == 'wdf_refunded' || $new_status == 'wdf_canceled')) {
+		if(($old_status == 'wdf_complete' || $old_status == 'wdf_approved') && in_array($new_status, array('wdf_refunded', 'wdf_canceled', 'wdf_pending'), true)) {
 			$action = 'decrease';
 		}
-		elseif(($old_status == 'wdf_refunded' || $old_status == 'wdf_canceled') && ($new_status == 'wdf_complete' || $new_status == 'wdf_approved')) {
+		elseif(in_array($old_status, array('wdf_refunded', 'wdf_canceled', 'wdf_pending'), true) && ($new_status == 'wdf_complete' || $new_status == 'wdf_approved')) {
 			$action = 'increase';
 		}
 
 		if(isset($action)) {
 			$rewards = get_post_meta($post->post_parent,'wdf_levels', true);
 			$trans = $this->get_transaction($post->ID);
-			
-			if($action == 'increase') { 
-				if(isset($rewards[$trans['reward']-1]['used'])) {
-					$rewards[$trans['reward']-1]['used'] ++;
-				}
-				else {
-					$rewards[$trans['reward']-1]['used'] = 1;
-				}
+
+			if(empty($trans['reward']) || !is_array($rewards)) {
+				return;
 			}
-			elseif($action == 'decrease') { 
-				if(isset($rewards[$trans['reward']-1]['used'])) {
-					$rewards[$trans['reward']-1]['used'] --;
-				}
+
+			$reward_index = (int) $trans['reward'] - 1;
+			if($reward_index < 0 || !isset($rewards[$reward_index])) {
+				return;
+			}
+
+			$used = isset($rewards[$reward_index]['used']) ? (int) $rewards[$reward_index]['used'] : 0;
+			if($action == 'increase') {
+				$rewards[$reward_index]['used'] = $used + 1;
+			}
+			elseif($action == 'decrease' && $used > 0) {
+				$rewards[$reward_index]['used'] = $used - 1;
 			}
 
 			update_post_meta($post->post_parent,'wdf_levels', $rewards);
@@ -1405,13 +1419,19 @@ class WDF {
 		}
 	}
 	function before_delete_post($post_id) {
-		if(get_post_type($post_id) == 'donation') {
+		if(get_post_type($post_id) == 'donation' && in_array(get_post_status($post_id), array('wdf_complete', 'wdf_approved'), true)) {
 			$trans = $this->get_transaction($post_id);
-			if(isset($trans['reward'])) {
+			if(!empty($trans['reward'])) {
 				$parent = wp_get_post_parent_id($post_id);
 				$rewards = get_post_meta($parent,'wdf_levels', true);
-				$rewards[$trans['reward']-1]['used'] --;
-				update_post_meta($parent,'wdf_levels', $rewards);
+				$reward_index = (int) $trans['reward'] - 1;
+				if(is_array($rewards) && $reward_index >= 0 && isset($rewards[$reward_index])) {
+					$used = isset($rewards[$reward_index]['used']) ? (int) $rewards[$reward_index]['used'] : 0;
+					if($used > 0) {
+						$rewards[$reward_index]['used'] = $used - 1;
+						update_post_meta($parent,'wdf_levels', $rewards);
+					}
+				}
 			}
 		}
 	}

@@ -39,6 +39,9 @@ namespace {
         }
     }
 
+    class RedirectResponse extends \Exception {
+    }
+
     class FakeFundraising {
         public $updated_pledge;
 
@@ -90,6 +93,33 @@ namespace {
     function home_url($path = '') {
         return 'https://example.test/' . ltrim($path, '/');
     }
+    function get_post($post_id) {
+        return (object) array('ID' => (int) $post_id);
+    }
+    function get_post_meta($post_id, $meta_key, $single = false) {
+        return false;
+    }
+    function wp_redirect($url) {
+        throw new RedirectResponse($url);
+    }
+    function esc_html($value) {
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    }
+    function esc_html__($value) {
+        return esc_html($value);
+    }
+    function esc_attr($value) {
+        return esc_html($value);
+    }
+    function esc_attr__($value) {
+        return esc_attr($value);
+    }
+    function esc_textarea($value) {
+        return esc_html($value);
+    }
+    function wp_kses_post($value) {
+        return strip_tags($value, '<a><b><br><em><i><p><strong><ul><ol><li>');
+    }
     function wp_send_json($data, $status = 200) {
         throw new JsonResponse($data, $status);
     }
@@ -106,6 +136,7 @@ namespace {
 
     require_once dirname(__DIR__) . '/lib/gateways/stripe.php';
     require_once dirname(__DIR__) . '/lib/gateways/paypal.php';
+    require_once dirname(__DIR__) . '/lib/gateways/manual.php';
 
     class VerifiedPayPalGateway extends \WDF_Gateway_PayPal {
         public function verify_paypal() {
@@ -193,7 +224,37 @@ namespace {
     $event->data->object->payment_status = 'paid';
     assert_same(true, $gateway->process_webhook_event($event), 'Asynchronous successful payment is processed');
     assert_same('wdf_complete', $wdf->updated_pledge[2], 'Asynchronous payment marks the pledge complete');
-    echo "Stripe Checkout and webhook flow tests passed.\n";
+    $test_options['wdf_settings']['manual'] = array(
+        'status' => 'wdf_complete',
+        'account_name' => 'Demo Konto',
+        'iban' => 'DE89 3704 0044 0532 0130 00',
+        'bic' => 'COBADEFFXXX',
+        'bank_name' => 'Demo Bank',
+        'reference_prefix' => 'Spende',
+    );
+    $wdf->updated_pledge = null;
+    $_SESSION['funder_id'] = 17;
+    $_SESSION['wdf_pledge'] = '10.00';
+    $_POST = array(
+        'first_name' => 'Ada',
+        'last_name' => 'Example',
+        'e-mail' => 'donor@example.test',
+    );
+    $manual = new \WDF_Gateway_Manual();
+    try {
+        $manual->process_simple();
+        throw new \RuntimeException('Expected the manual gateway to redirect.');
+    } catch (RedirectResponse $response) {
+        assert_same(true, strpos($response->getMessage(), 'pledge_id=pledge-test-123') !== false, 'Manual transfer confirmation contains the pledge ID');
+    }
+    assert_same('wdf_pending', $wdf->updated_pledge[2], 'Manual transfer is saved as pending regardless of legacy status setting');
+    assert_same('Ausstehend', $wdf->updated_pledge[3]['status'], 'Manual transaction stores pending status label');
+    assert_same('Spende pledge-test-123', $wdf->updated_pledge[3]['reference'], 'Manual transaction stores a unique payment reference');
+    $manual_info = $manual->payment_info('', $wdf->updated_pledge[3]);
+    assert_same(true, strpos($manual_info, 'data:image/svg+xml;base64,') !== false, 'Valid bank details produce a local SVG EPC QR');
+    assert_same(true, strpos($manual_info, 'DE89370400440532013000') !== false, 'Transfer details include the normalized IBAN');
+    assert_same(true, strpos($manual_info, 'Spende pledge-test-123') !== false, 'Transfer details include the unique reference');
+    echo "Manual transfer and EPC QR flow tests passed.\n";
 
     $test_options['wdf_settings']['paypal'] = array();
     $test_options['wdf_settings']['paypal_sb'] = 'no';

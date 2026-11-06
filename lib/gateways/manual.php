@@ -98,9 +98,10 @@ if(!class_exists('WDF_Gateway_Manual')) {
 					$transaction['payer_email'] = (isset($_POST['e-mail']) ? $_POST['e-mail'] : '' );
 					$transaction['gateway_public'] = $this->public_name;
 					$transaction['gateway'] = $this->plugin_name;
-					$status = (isset($settings['manual']['status']) ? $settings['manual']['status'] : 'wdf_complete' );
-					$transaction['status'] = __('Ausstehend/Genehmigt','wdf');
-					$transaction['gateway_msg'] = __('Manuelle Zahlung.','wdf');
+					$status = 'wdf_pending';
+					$transaction['status'] = __('Ausstehend','wdf');
+					$transaction['gateway_msg'] = __('Warte auf den Eingang der Überweisung.','wdf');
+					$transaction['reference'] = $this->get_payment_reference($pledge_id, $settings);
 
 					if(isset($_SESSION['wdf_reward']))
 						$transaction['reward'] = $_SESSION['wdf_reward'];
@@ -140,11 +141,104 @@ if(!class_exists('WDF_Gateway_Manual')) {
 		}
 		function payment_info( $content, $transaction ) {
 			$settings = get_option('wdf_settings');
+			$manual_settings = isset($settings['manual']) && is_array($settings['manual']) ? $settings['manual'] : array();
+			$account_name = isset($manual_settings['account_name']) ? $manual_settings['account_name'] : '';
+			$iban = isset($manual_settings['iban']) ? strtoupper(preg_replace('/\s+/', '', $manual_settings['iban'])) : '';
+			$bic = isset($manual_settings['bic']) ? strtoupper(preg_replace('/\s+/', '', $manual_settings['bic'])) : '';
+			$bank_name = isset($manual_settings['bank_name']) ? $manual_settings['bank_name'] : '';
+			$reference = isset($transaction['reference']) ? $transaction['reference'] : '';
+			$amount = isset($transaction['gross']) && is_numeric($transaction['gross']) ? number_format((float) $transaction['gross'], 2, '.', '') : '';
+			$currency = isset($transaction['currency_code']) ? strtoupper($transaction['currency_code']) : '';
 
 			$content = '<div class="manual_transaction_info">';
-			$content .= html_entity_decode(stripslashes($settings['manual']['after_info']));
+			$content .= '<h3>' . esc_html__('Überweisung ausstehend', 'wdf') . '</h3>';
+			$content .= '<p>' . esc_html__('Bitte überweise Deine Unterstützung. Sie wird nach Zahlungseingang bestätigt.', 'wdf') . '</p>';
+			$content .= '<dl>';
+			if ($account_name) {
+				$content .= '<dt>' . esc_html__('Kontoinhaber', 'wdf') . '</dt><dd>' . esc_html($account_name) . '</dd>';
+			}
+			if ($bank_name) {
+				$content .= '<dt>' . esc_html__('Bank', 'wdf') . '</dt><dd>' . esc_html($bank_name) . '</dd>';
+			}
+			if ($iban) {
+				$content .= '<dt>' . esc_html__('IBAN', 'wdf') . '</dt><dd><code>' . esc_html($iban) . '</code></dd>';
+			}
+			if ($bic) {
+				$content .= '<dt>' . esc_html__('BIC', 'wdf') . '</dt><dd><code>' . esc_html($bic) . '</code></dd>';
+			}
+			if ($amount !== '') {
+				$content .= '<dt>' . esc_html__('Betrag', 'wdf') . '</dt><dd>' . esc_html($amount . ' ' . $currency) . '</dd>';
+			}
+			if ($reference) {
+				$content .= '<dt>' . esc_html__('Verwendungszweck', 'wdf') . '</dt><dd><code>' . esc_html($reference) . '</code></dd>';
+			}
+			$content .= '</dl>';
+
+			if (!$account_name || !$iban) {
+				$content .= '<p class="manual_transaction_missing_details">' . esc_html__('Die Bankverbindung ist noch nicht vollständig eingerichtet. Bitte kontaktiere den Veranstalter für die Überweisungsdaten.', 'wdf') . '</p>';
+			}
+
+			if ($currency === 'EUR' && $this->can_generate_epc_qr($iban, $account_name) && $amount !== '' && $reference) {
+				$payload = implode("\n", array(
+					'BCD',
+					'001',
+					'1',
+					'SCT',
+					preg_match('/^[A-Z0-9]{8}([A-Z0-9]{3})?$/', $bic) ? $bic : '',
+					substr($account_name, 0, 70),
+					$iban,
+					$currency . $amount,
+					'',
+					'',
+					substr($reference, 0, 140),
+				));
+
+				if (is_readable(WDF_PLUGIN_BASE_DIR . '/lib/gateways/vendor/autoload.php')) {
+					require_once WDF_PLUGIN_BASE_DIR . '/lib/gateways/vendor/autoload.php';
+					$qr_options = new \chillerlan\QRCode\QROptions(array(
+						'outputType' => \chillerlan\QRCode\QRCode::OUTPUT_MARKUP_SVG,
+						'imageBase64' => true,
+						'scale' => 6,
+						'eccLevel' => \chillerlan\QRCode\QRCode::ECC_M,
+					));
+					$qr_code = (new \chillerlan\QRCode\QRCode($qr_options))->render($payload);
+					$content .= '<p class="manual_transaction_qr"><img src="' . esc_attr($qr_code) . '" width="240" height="240" alt="' . esc_attr__('SEPA-Überweisungs-QR-Code', 'wdf') . '" /><br />';
+					$content .= '<span>' . esc_html__('Mit der Banking-App scannen, um Empfänger, Betrag und Verwendungszweck zu übernehmen.', 'wdf') . '</span></p>';
+				}
+			}
+
+			$after_info = isset($manual_settings['after_info']) ? html_entity_decode(stripslashes($manual_settings['after_info']), ENT_QUOTES, get_option('blog_charset')) : '';
+			if ($after_info) {
+				$content .= '<div class="manual_transaction_extra_info">' . wp_kses_post($after_info) . '</div>';
+			}
 			$content .= '</div>';
 			return $content;
+		}
+
+		private function get_payment_reference($pledge_id, $settings) {
+			$manual_settings = isset($settings['manual']) && is_array($settings['manual']) ? $settings['manual'] : array();
+			$prefix = isset($manual_settings['reference_prefix']) ? sanitize_text_field($manual_settings['reference_prefix']) : '';
+			$reference = trim(substr($prefix, 0, 100) . ' ' . $pledge_id);
+
+			return substr($reference, 0, 140);
+		}
+
+		private function can_generate_epc_qr($iban, $account_name) {
+			if (!$account_name || !preg_match('/^[A-Z]{2}[0-9]{2}[A-Z0-9]{11,30}$/', $iban)) {
+				return false;
+			}
+
+			$iban_check = substr($iban, 4) . substr($iban, 0, 4);
+			$iban_check = preg_replace_callback('/[A-Z]/', function($match) {
+				return (string) (ord($match[0]) - 55);
+			}, $iban_check);
+
+			$remainder = 0;
+			foreach (str_split($iban_check) as $digit) {
+				$remainder = (int) (($remainder . $digit) % 97);
+			}
+
+			return $remainder === 1;
 		}
 		function handle_ipn() {
 		}
@@ -153,26 +247,49 @@ if(!class_exists('WDF_Gateway_Manual')) {
 
 		function admin_settings() {
 			$settings = get_option('wdf_settings');
+			$manual = isset($settings['manual']) && is_array($settings['manual']) ? $settings['manual'] : array();
 		?>
 			<table class="form-table">
 				<tbody>
-				<tr valign="top" >
+				<tr>
 					<th scope="row">
-						<label for="wdf_settings[manual][status]"><?php echo __('Standardstatus für Zahlungen','wdf'); ?></label>
-					</th>
-					<td><select name="wdf_settings[manual][status]">
-							<option value="wdf_complete" <?php ( isset($settings['manual']['status']) ? selected($settings['manual']['status'],'wdf_complete') : '' ); ?>><?php _e('Komplett','wdf'); ?></option>
-							<option value="wdf_approved" <?php ( isset($settings['manual']['status']) ?  selected($settings['manual']['status'],'wdf_approved') : '' ); ?>><?php _e('Genehmigt','wdf'); ?></option>
-							<option value="wdf_canceled" <?php ( isset($settings['manual']['status']) ?  selected($settings['manual']['status'],'wdf_canceled') : '' ); ?>><?php _e('Storniert','wdf'); ?></option>
-						</select>
-					</td>
-				</tr>
-				<tr valign="top" id="wdf_settings_manual_after_info">
-					<th scope="row">
-						<label for="wdf_settings[manual][after_info]"><?php echo __('Informationen, die nach der Unterstützung angezeigt werden (Du kannst HTML verwenden)','wdf'); ?></label>
+						<?php _e('Zahlungsstatus', 'wdf'); ?>
 					</th>
 					<td>
-						<textarea name="wdf_settings[manual][after_info]" class="widefat" rows="5"><?php echo ( isset($settings['manual']['after_info']) ?  $settings['manual']['after_info'] : '' ); ?></textarea>
+						<strong><?php _e('Ausstehend', 'wdf'); ?></strong>
+						<p class="description"><?php _e('Überweisungen werden zunächst als ausstehend gespeichert. Markiere sie nach dem Zahlungseingang in der Unterstützung als „Komplett“.', 'wdf'); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="wdf_manual_account_name"><?php _e('Kontoinhaber', 'wdf'); ?></label></th>
+					<td><input id="wdf_manual_account_name" type="text" class="regular-text" name="wdf_settings[manual][account_name]" value="<?php echo esc_attr(isset($manual['account_name']) ? $manual['account_name'] : ''); ?>" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="wdf_manual_iban"><?php _e('IBAN', 'wdf'); ?></label></th>
+					<td><input id="wdf_manual_iban" type="text" class="regular-text" name="wdf_settings[manual][iban]" value="<?php echo esc_attr(isset($manual['iban']) ? $manual['iban'] : ''); ?>" autocomplete="off" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="wdf_manual_bic"><?php _e('BIC (optional)', 'wdf'); ?></label></th>
+					<td><input id="wdf_manual_bic" type="text" class="regular-text" name="wdf_settings[manual][bic]" value="<?php echo esc_attr(isset($manual['bic']) ? $manual['bic'] : ''); ?>" autocomplete="off" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="wdf_manual_bank_name"><?php _e('Name der Bank (optional)', 'wdf'); ?></label></th>
+					<td><input id="wdf_manual_bank_name" type="text" class="regular-text" name="wdf_settings[manual][bank_name]" value="<?php echo esc_attr(isset($manual['bank_name']) ? $manual['bank_name'] : ''); ?>" /></td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="wdf_manual_reference_prefix"><?php _e('Verwendungszweck-Präfix', 'wdf'); ?></label></th>
+					<td>
+						<input id="wdf_manual_reference_prefix" type="text" class="regular-text" name="wdf_settings[manual][reference_prefix]" value="<?php echo esc_attr(isset($manual['reference_prefix']) ? $manual['reference_prefix'] : __('Spende', 'wdf')); ?>" />
+						<p class="description"><?php _e('Die eindeutige Spendenreferenz wird automatisch angehängt und im EPC-QR-Code verwendet.', 'wdf'); ?></p>
+					</td>
+				</tr>
+				<tr id="wdf_settings_manual_after_info">
+					<th scope="row">
+						<label for="wdf_manual_after_info"><?php _e('Zusätzliche Hinweise nach der Spende', 'wdf'); ?></label>
+					</th>
+					<td>
+						<textarea id="wdf_manual_after_info" name="wdf_settings[manual][after_info]" class="widefat" rows="5"><?php echo esc_textarea(isset($manual['after_info']) ? html_entity_decode(stripslashes($manual['after_info']), ENT_QUOTES, get_option('blog_charset')) : ''); ?></textarea>
+						<p class="description"><?php _e('EPC-QR wird lokal erzeugt, sofern Kontoinhaber und eine gültige IBAN eingetragen sind. Es werden keine Bankdaten an einen QR-Dienst übermittelt.', 'wdf'); ?></p>
 					</td>
 				</tr>
 				</tbody>
@@ -182,15 +299,18 @@ if(!class_exists('WDF_Gateway_Manual')) {
 		function save_gateway_settings() {
 
 			if( isset($_POST['wdf_settings']['manual']) ) {
-				$new['manual']['after_info'] = htmlentities($_POST['wdf_settings']['manual']['after_info']);
-				$statuses = array('wdf_complete', 'wdf_approved', 'wdf_canceled');
-				if(in_array($_POST['wdf_settings']['manual']['status'], $statuses))
-					$new['manual']['status'] = $_POST['wdf_settings']['manual']['status'];
-				else
-					$new['manual']['status'] = 'wdf_complete';
-
+				$posted_manual = wp_unslash($_POST['wdf_settings']['manual']);
 				$settings = get_option('wdf_settings');
-				$settings = array_merge($settings,$new);
+				$settings = is_array($settings) ? $settings : array();
+				$manual = isset($settings['manual']) && is_array($settings['manual']) ? $settings['manual'] : array();
+				$manual['account_name'] = sanitize_text_field(isset($posted_manual['account_name']) ? $posted_manual['account_name'] : '');
+				$manual['iban'] = strtoupper(preg_replace('/\s+/', '', sanitize_text_field(isset($posted_manual['iban']) ? $posted_manual['iban'] : '')));
+				$manual['bic'] = strtoupper(preg_replace('/\s+/', '', sanitize_text_field(isset($posted_manual['bic']) ? $posted_manual['bic'] : '')));
+				$manual['bank_name'] = sanitize_text_field(isset($posted_manual['bank_name']) ? $posted_manual['bank_name'] : '');
+				$manual['reference_prefix'] = sanitize_text_field(isset($posted_manual['reference_prefix']) ? $posted_manual['reference_prefix'] : __('Spende', 'wdf'));
+				$manual['after_info'] = wp_kses_post(isset($posted_manual['after_info']) ? $posted_manual['after_info'] : '');
+				$manual['status'] = 'wdf_pending';
+				$settings['manual'] = $manual;
 				update_option('wdf_settings',$settings);
 			}
 		}
