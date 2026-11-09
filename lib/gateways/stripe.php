@@ -205,6 +205,12 @@ if (!class_exists('WDF_Gateway_Stripe')) {
             if (!empty($metadata->reward)) {
                 $transaction['reward'] = absint($metadata->reward);
             }
+            if (!empty($metadata->ps_community_user_id)) {
+                $transaction['ps_community_user_id'] = absint($metadata->ps_community_user_id);
+            }
+            if (!empty($metadata->ps_community_activity)) {
+                $transaction['ps_community_activity'] = '1';
+            }
 
             if (isset($checkout_session->customer_details->email)) {
                 $transaction['payer_email'] = sanitize_email($checkout_session->customer_details->email);
@@ -322,6 +328,8 @@ function wdf_stripe_create_session() {
             'funder_id' => (string) $post_id,
             'type' => isset($_SESSION['wdf_type']) ? sanitize_text_field($_SESSION['wdf_type']) : 'simple',
             'reward' => isset($_SESSION['wdf_reward']) ? (string) absint($_SESSION['wdf_reward']) : '',
+            'ps_community_user_id' => function_exists('is_user_logged_in') && is_user_logged_in() ? (string) get_current_user_id() : '',
+            'ps_community_activity' => !empty($_SESSION['wdf_ps_community_activity']) ? '1' : '',
         ],
     ];
 

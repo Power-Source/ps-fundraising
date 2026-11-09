@@ -1,5 +1,14 @@
 <?php
 $settings = get_option('wdf_settings');
+$ps_community_settings = wp_parse_args(
+	isset($settings['ps_community']) && is_array($settings['ps_community']) ? $settings['ps_community'] : array(),
+	array(
+		'enabled' => '1',
+		'show_campaigns' => '1',
+		'show_supports' => '1',
+		'allow_activity' => '1',
+	)
+);
 
 if (!class_exists('Psource_HelpTooltips')) require_once WDF_PLUGIN_BASE_DIR . '/lib/classes/class.wd_help_tooltips.php';
 	$tips = new Psource_HelpTooltips();
@@ -314,6 +323,35 @@ if (!class_exists('Psource_HelpTooltips')) require_once WDF_PLUGIN_BASE_DIR . '/
 										</td>
 									</tr>
 									<?php endif; ?>
+								</tbody>
+							</table>
+							<h3><?php _e('PS Community Integration','wdf'); ?></h3>
+							<p class="description"><?php _e('Erweitert PS-Community-Profile um Fundraising-Inhalte, wenn PS Community mit der Aktivitätsfunktion aktiv ist.','wdf'); ?></p>
+							<table class="form-table">
+								<tbody>
+									<tr valign="top">
+										<th scope="row"><?php _e('Integration aktivieren','wdf'); ?></th>
+										<td>
+											<input type="hidden" name="wdf_settings[ps_community][enabled]" value="0" />
+											<label><input type="checkbox" name="wdf_settings[ps_community][enabled]" value="1" <?php checked($ps_community_settings['enabled'], '1'); ?> /> <?php _e('PS Community integrieren','wdf'); ?></label>
+										</td>
+									</tr>
+									<tr valign="top">
+										<th scope="row"><?php _e('Profil-Tabs','wdf'); ?></th>
+										<td>
+											<input type="hidden" name="wdf_settings[ps_community][show_campaigns]" value="0" />
+											<label><input type="checkbox" name="wdf_settings[ps_community][show_campaigns]" value="1" <?php checked($ps_community_settings['show_campaigns'], '1'); ?> /> <?php _e('Erstellte Spendenaktionen im Profil anzeigen','wdf'); ?></label><br />
+											<input type="hidden" name="wdf_settings[ps_community][show_supports]" value="0" />
+											<label><input type="checkbox" name="wdf_settings[ps_community][show_supports]" value="1" <?php checked($ps_community_settings['show_supports'], '1'); ?> /> <?php _e('Eigene Unterstützungen im eigenen Profil anzeigen','wdf'); ?></label>
+										</td>
+									</tr>
+									<tr valign="top">
+										<th scope="row"><?php _e('Aktivitäten','wdf'); ?></th>
+										<td>
+											<input type="hidden" name="wdf_settings[ps_community][allow_activity]" value="0" />
+											<label><input type="checkbox" name="wdf_settings[ps_community][allow_activity]" value="1" <?php checked($ps_community_settings['allow_activity'], '1'); ?> /> <?php _e('Eingeloggten Unterstützern die freiwillige Veröffentlichung im Profil anbieten','wdf'); ?></label>
+										</td>
+									</tr>
 								</tbody>
 							</table>
 							<?php /*?><h3><?php _e('Other Settings','wdf'); ?></h3>

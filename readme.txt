@@ -5,7 +5,7 @@ Requires at least: 4.9
 Requires CP: 2.7
 Requires PHP: 8.0
 Tested up to: 7.2.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -204,6 +204,10 @@ Ja! Das Plugin ist vollständig mit BuddyPress integriert und zeigt Aktivitäten
 Erstelle eine CSS-Datei und speichere sie im `/styles/` Ordner oder in `wp-content/wdf-styles/`. Der Filter `wdf_custom_style_name` erlaubt Dir einen benutzerdefinierten Namen.
 
 == Changelog ==
+
+= 1.0.2 =
+* Der Shortcode-Button im klassischen Editor öffnet den Dialog wieder als Popup, statt zur Einfüge-Seite weiterzuleiten.
+* Optionale PS Community-Integration ergänzt: Profil-Tabs für Kampagnen und eigene Unterstützungen sowie freiwillige Aktivitäten für eingeloggte Unterstützer.
 
 = 1.0.1 =
 * Überweisungsgateway überarbeitet: Bankverbindung und Verwendungszweck lassen sich konfigurieren; auf der Bestätigungsseite werden die Zahlungsdaten angezeigt.

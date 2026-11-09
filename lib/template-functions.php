@@ -471,19 +471,8 @@ if(!function_exists('wdf_confirmation_page')) {
             if ( $pledge ) {
                 $transaction = $wdf->get_transaction($pledge->ID);
 
-                if(isset($_SESSION['wdf_bp_activity']) && $_SESSION['wdf_bp_activity'] == true) {
-                    global $bp;
-                    if( isset($bp->loggedin_user->id) && $bp->loggedin_user->id ) {
-                        $activity_args = array(
-                            'action' => sprintf( __('%s hat mit %s %s eine Unterstützung für %s geleistet','wdf'), '<a href="'.$bp->loggedin_user->domain.'">'.$bp->loggedin_user->fullname.'</a>', $wdf->format_currency('',$transaction['gross']), esc_attr($settings['donation_labels']['singular_name']), '<a href="'.wdf_get_funder_page('',$post_id).'">'.get_the_title($post_id).'</a>' ),
-                            'primary_link' => wdf_get_funder_page('',$post_id),
-                            'type' => 'pledge'
-                        );
-                        $activity_args = apply_filters('wdf_bp_activity_args',$activity_args);
-                        bp_wdf_record_activity($activity_args);
-
-                        unset($_SESSION['wdf_bp_activity']);
-                    }
+                if ( function_exists('wdf_ps_community_maybe_record_activity') ) {
+                    wdf_ps_community_maybe_record_activity($pledge, $post_id);
                 }
 
                 $content .= wdf_thanks_panel( false, $post_id, $transaction );
@@ -866,8 +855,8 @@ if(!function_exists('wdf_pledge_button')) {
 			$content .= '<input type="hidden" name="funder_id" value="'.$post_id.'" />';
 			$content .= '<input id="wdf_step" type="hidden" name="wdf_step" value="" />';
 			$pledge_label = apply_filters( 'wdf_donate_button_text', esc_attr($settings['donation_labels']['action_name']) );
-			if(defined('WDF_BP_INSTALLED') && WDF_BP_INSTALLED == true && is_user_logged_in())
-					$content .= '<label class="wdf_bp_show_on_activity">'.__('Veröffentliche in deinem Profil','wdf').'<input type="checkbox" name="wdf_bp_activity" value="1" checked="checked" /></label>';
+			if(function_exists('wdf_ps_community_can_publish_activity') && wdf_ps_community_can_publish_activity())
+					$content .= '<label class="wdf_bp_show_on_activity">'.__('Veröffentliche in deinem Profil','wdf').'<input type="checkbox" name="wdf_ps_community_activity" value="1" /></label>';
 			$content .= '<input class="wdf_send_donation" type="submit" name="wdf_send_donation" value="'.$pledge_label.'" />';
 
 			// Stripe: Recurring-Option ausblenden und auf "Einmal" setzen

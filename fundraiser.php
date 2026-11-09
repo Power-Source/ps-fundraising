@@ -3,7 +3,7 @@
 Plugin Name: PS Fundraising
 Plugin URI: https://psource.eimen.net/psource/ps-fundraising/
 Description: Erstelle eine Spendenseite für jeden Zweck oder jedes Projekt.
-Version: 1.0.1
+Version: 1.0.2
 Text Domain: wdf
 Author: PSOURCE
 Domain Path: /languages
@@ -128,7 +128,7 @@ class WDF {
 	public $wdf_msg = false;
 
 	function _vars() {
-		$this->version = '1.0.1';
+		$this->version = '1.0.2';
 		$this->defaults = array(
 			'currency' => 'EUR',
 			'dir_slug' => 'spendenaktionen',
@@ -151,6 +151,12 @@ class WDF {
 			'default_email' => 'Vielen Dank für Deine Unterstützung. Deine Spende von %DONATIONTOTAL% wurde erhalten und wird sehr geschätzt. Danke für Deine Unterstützung.',
 			'current_version' => $this->version,
 			'checkout_type' => '1',
+			'ps_community' => array(
+				'enabled' => '1',
+				'show_campaigns' => '1',
+				'show_supports' => '1',
+				'allow_activity' => '1',
+			),
 			'funder_labels' => array(
 				'menu_name' => 'Fundraising',
 				'singular_name' => 'Spendenaktion',
@@ -720,6 +726,7 @@ class WDF {
 
 		//load gateway plugin API
 		require_once( WDF_PLUGIN_BASE_DIR . '/lib/classes/class.gateway.php' );
+		require_once( WDF_PLUGIN_BASE_DIR . '/lib/integrations/ps-community.php' );
 		$this->load_gateway_plugins();
 
 		// Load up our available styles
@@ -901,6 +908,7 @@ class WDF {
 		unset($_SESSION['wdf_sender_email']);
 		unset($_SESSION['wdf_recurring']);
 		unset($_SESSION['wdf_reward']);
+		unset($_SESSION['wdf_ps_community_activity']);
 
 		// Action hook for plugins that need to clear session variables.
 		do_action('wdf_clear_session');
@@ -942,6 +950,8 @@ class WDF {
 
 		if( isset($_POST['wdf_bp_activity']) && $_POST['wdf_bp_activity'] == '1' )
 			$_SESSION['wdf_bp_activity'] = true;
+		if( isset($_POST['wdf_ps_community_activity']) && $_POST['wdf_ps_community_activity'] == '1' )
+			$_SESSION['wdf_ps_community_activity'] = true;
 
 		$process_payment = false;
 		global $wdf_gateway_active_plugins;
@@ -1083,6 +1093,15 @@ class WDF {
         }
         update_post_meta($id, 'wdf_transaction', $transaction);
         update_post_meta($id,'wdf_native', '1');
+		if ( !get_post_meta($id, 'wdf_ps_community_supporter_id', true) ) {
+			$supporter_id = !empty($transaction['ps_community_user_id']) ? absint($transaction['ps_community_user_id']) : get_current_user_id();
+			if ( $supporter_id ) {
+				update_post_meta($id, 'wdf_ps_community_supporter_id', $supporter_id);
+			}
+		}
+		if ( !empty($transaction['ps_community_activity']) || !empty($_SESSION['wdf_ps_community_activity']) ) {
+			update_post_meta($id, 'wdf_ps_community_activity_requested', '1');
+		}
 
         if(!empty($transaction['reward']) && !$pledge_exists && in_array($status, array('wdf_complete', 'wdf_approved'), true)) {
             $rewards = get_post_meta($funder_id,'wdf_levels', true);
@@ -1259,7 +1278,7 @@ class WDF {
 				$new[$k] = sanitize_title($v,__('Spenden','wdf'));
 			} else if ( $k == 'paypal_email' ) {
 				$new[$k] = is_email($v);
-			} elseif ( $k == 'payment_types' || $k == 'active_gateways' || $k == 'funder_labels' || $k == 'donation_labels' ) {
+			} elseif ( $k == 'payment_types' || $k == 'active_gateways' || $k == 'funder_labels' || $k == 'donation_labels' || $k == 'ps_community' ) {
 				$new[$k] = array_map(
 					'esc_attr',
 					empty($v) ? array() : $v
@@ -1476,6 +1495,7 @@ class WDF {
 		} elseif( $typenow != 'funder' && $typenow != 'donation') {
 			if($hook == 'post.php' || $hook == 'post-new.php') {
 				//Media Button Includes For Other Post Types
+				add_thickbox();
 				wp_enqueue_style('colorpicker');
 				wp_enqueue_style('wdf-base');
 				wp_enqueue_script('wdf-media');
