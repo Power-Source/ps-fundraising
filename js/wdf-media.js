@@ -78,6 +78,48 @@ function wdf_inject_shortcode () {
 		
 	}
 }
+
+function wdf_show_shortcode_loading() {
+	var loading = jQuery('#wdf_shortcode_loading');
+
+	if (!loading.length) {
+		loading = jQuery('<div id="wdf_shortcode_loading" role="status">Lade Shortcode-Optionen ...</div>');
+		loading.css({
+			'background': '#fff',
+			'border-radius': '3px',
+			'box-shadow': '0 1px 5px rgba(0, 0, 0, .35)',
+			'font-size': '14px',
+			'left': '50%',
+			'padding': '14px 20px',
+			'position': 'fixed',
+			'top': '50%',
+			'transform': 'translate(-50%, -50%)',
+			'z-index': 100100
+		});
+		jQuery('body').append(loading);
+	}
+
+	var attempts = 0;
+	function watchIframe() {
+		var iframe = jQuery('#TB_iframeContent');
+
+		if (iframe.length) {
+			iframe.one('load', function() {
+				loading.remove();
+			});
+		} else if (attempts < 10) {
+			attempts++;
+			window.setTimeout(watchIframe, 50);
+		}
+	}
+
+	window.setTimeout(watchIframe, 0);
+}
+
+jQuery(function($) {
+	$(document).on('click', '#add_wdf', wdf_show_shortcode_loading);
+});
+
 function wdf_input_switch(elm) {
 	elm = jQuery(elm);
 	var iFrame = jQuery('#TB_iframeContent').contents();

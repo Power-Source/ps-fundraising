@@ -1468,7 +1468,7 @@ class WDF {
 		//Register Styles and Scripts For The Admin Area
 		wp_register_script( 'wdf-post', WDF_PLUGIN_URL . '/js/wdf-post.js', array('jquery'), $this->version, false );
 		wp_register_script( 'wdf-edit', WDF_PLUGIN_URL . '/js/wdf-edit.js', array('jquery'), $this->version, false );
-		wp_register_script( 'wdf-media', WDF_PLUGIN_URL . '/js/wdf-media.js', array('jquery'), $this->version, true );
+		wp_register_script( 'wdf-media', WDF_PLUGIN_URL . '/js/wdf-media.js', array('jquery'), filemtime(WDF_PLUGIN_BASE_DIR . '/js/wdf-media.js'), true );
 		wp_register_script( 'wdf-widget', WDF_PLUGIN_URL . '/js/wdf-widget.js', array('jquery'), $this->version, true );
 
 
@@ -1726,7 +1726,7 @@ class WDF {
 			($context == 'content') &&
 			($pagenow != 'index.php')
 		) {
-			echo '<a title="'.__('Füge Fundraising-Shortcodes ein','wdf').'" class="thickbox button add_media" id="add_wdf" href="'.admin_url('media-upload.php?post_id='.$post->ID).'&tab=donate_button&TB_iframe=1&wdf=1"><img onclick="return false;" alt="'.__('Füge Fundraising-Shortcodes ein','wdf').'" src="'.WDF_PLUGIN_URL.'/img/sm_ico.png"></a>';
+			echo '<a title="'.__('Füge Fundraising-Shortcodes ein','wdf').'" class="thickbox button add_media" id="add_wdf" href="'.admin_url('media-upload.php?post_id='.$post->ID).'&tab=donate_button&TB_iframe=1&wdf=1" onclick="if (window.wdf_show_shortcode_loading) { window.wdf_show_shortcode_loading(); }"><img onclick="return false;" alt="'.__('Füge Fundraising-Shortcodes ein','wdf').'" src="'.WDF_PLUGIN_URL.'/img/sm_ico.png"></a>';
 		}
 	}
 	function media_progress_bar_iframe($include_header = true) {
