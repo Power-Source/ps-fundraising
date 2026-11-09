@@ -2,11 +2,11 @@
 
 [Deutsch](README.md) | **English**
 
-[![Version](https://img.shields.io/badge/Version-1.0.1-2271b1?style=flat-square)](readme.txt)
+[![Version](https://img.shields.io/badge/Version-1.0.2-2271b1?style=flat-square)](readme.txt)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
-![WordPress](https://img.shields.io/badge/WordPress-4.9%2B-21759b?style=flat-square&logo=wordpress&logoColor=white)
-![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7%2B-03768e?style=flat-square)
-[![License](https://img.shields.io/badge/License-GPL--2.0--or--later-2ea44f?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
+![WordPress](https://img.shields.io/badge/WordPress-bis%207.2.4-21759b?style=flat-square&logo=wordpress&logoColor=white)
+![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4%2B-03768e?style=flat-square)
+[![Lizenz](https://img.shields.io/badge/Lizenz-GPL--2.0--or--later-2ea44f?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 ### Your fundraiser. Your website. Your community.
 

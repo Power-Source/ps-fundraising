@@ -5,7 +5,7 @@
 [![Version](https://img.shields.io/badge/Version-1.0.2-2271b1?style=flat-square)](readme.txt)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-777bb4?style=flat-square&logo=php&logoColor=white)
 ![WordPress](https://img.shields.io/badge/WordPress-bis%207.2.4-21759b?style=flat-square&logo=wordpress&logoColor=white)
-![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7%2B-03768e?style=flat-square)
+![ClassicPress](https://img.shields.io/badge/ClassicPress-2.7.4%2B-03768e?style=flat-square)
 [![Lizenz](https://img.shields.io/badge/Lizenz-GPL--2.0--or--later-2ea44f?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 ### Deine Spendenaktion. Deine Website. Deine Community.
@@ -22,7 +22,6 @@ Mit **PS Fundraising** organisierst Du Spendenaktionen und Crowdfunding direkt a
 - **Ausstehende Überweisungen:** Manuelle Zahlungen bleiben zunächst „Ausstehend“ und werden nach Zahlungseingang von Dir bestätigt.
 - **SEPA-QR-Code:** Für EUR-Überweisungen kann ein EPC-QR-Code direkt auf der Website erzeugt werden. Die QR-Erzeugung erfolgt lokal.
 - **Einbindung nach Wunsch:** Verwende Shortcodes, Widgets oder Theme-Vorlagen.
-- **Schneller Shortcode-Dialog:** Wechsle zwischen Einfügeoptionen ohne erneutes Laden des Dialogs.
 - **BuddyPress-Integration:** Ergänze Deine Community um gemeinschaftliches Fundraising.
 - **PS Community-Integration:** Zeige Kampagnen und eigene Unterstützungen in Community-Profilen; eingeloggte Unterstützer können Aktivitäten freiwillig veröffentlichen.
 - **Ein responsives Kampagnendesign:** Kennzahlen stehen nebeneinander und passen sich kleineren Bildschirmen an.
