@@ -208,6 +208,7 @@ Erstelle eine CSS-Datei und speichere sie im `/styles/` Ordner oder in `wp-conte
 = 1.0.2 =
 * Der Shortcode-Button im klassischen Editor öffnet den Dialog wieder als Popup, statt zur Einfüge-Seite weiterzuleiten.
 * Optionale PS Community-Integration ergänzt: Profil-Tabs für Kampagnen und eigene Unterstützungen sowie freiwillige Aktivitäten für eingeloggte Unterstützer.
+* Shortcode-Dialog optimiert: Alle Einfügeformulare werden einmal geladen; Tabwechsel erfolgen ohne erneuten Server-Request.
 
 = 1.0.1 =
 * Überweisungsgateway überarbeitet: Bankverbindung und Verwendungszweck lassen sich konfigurieren; auf der Bestätigungsseite werden die Zahlungsdaten angezeigt.

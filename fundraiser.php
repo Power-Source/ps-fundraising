@@ -120,6 +120,7 @@ class WDF {
 	private $canadian_provinces;
 	private $eu_countries;
 	private $currencies;
+	private $media_funders;
 	public $is_funder_checkout = false;
 	public $is_funder_confirm = false;
 	public $is_funder_single = false;
@@ -1640,16 +1641,83 @@ class WDF {
 		return $tabs;
 	}
 	function media_fundraising() {
-		wp_iframe(array(&$this, 'media_fundraiser_iframe'));
+		wp_iframe(array(&$this, 'media_shortcode_iframe'));
 	}
 	function media_pledges() {
-		wp_iframe(array(&$this, 'media_pledges_iframe'));
+		wp_iframe(array(&$this, 'media_shortcode_iframe'));
 	}
 	function media_donate_button() {
-		wp_iframe(array(&$this, 'media_donate_button_iframe'));
+		wp_iframe(array(&$this, 'media_shortcode_iframe'));
 	}
 	function media_progress_bar() {
-		wp_iframe(array(&$this, 'media_progress_bar_iframe'));
+		wp_iframe(array(&$this, 'media_shortcode_iframe'));
+	}
+	function media_shortcode_iframe() {
+		$tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'donate_button';
+		$tabs = array('donate_button', 'fundraising', 'pledges', 'progress_bar');
+		if ( !in_array($tab, $tabs, true) ) {
+			$tab = 'donate_button';
+		}
+
+		media_upload_header();
+		?>
+		<style type="text/css">
+			.wdf_media_cont { display: none; }
+			.wdf_media_cont.is-active { display: block; }
+		</style>
+		<?php
+		$this->media_donate_button_iframe(false);
+		$this->media_fundraiser_iframe(false);
+		$this->media_pledges_iframe(false);
+		$this->media_progress_bar_iframe(false);
+		?>
+		<script type="text/javascript">
+			jQuery(function($) {
+				var tabs = ['donate_button', 'fundraising', 'pledges', 'progress_bar'];
+
+				function showTab(tab) {
+					if (tabs.indexOf(tab) === -1) {
+						return;
+					}
+
+					$('.wdf_media_cont').removeClass('is-active');
+					$('#media_' + tab).addClass('is-active');
+					$('#sidemenu a').removeClass('current').each(function() {
+						var href = $(this).attr('href') || '';
+						if (href.indexOf('tab=' + tab) !== -1) {
+							$(this).addClass('current');
+						}
+					});
+				}
+
+				$('#sidemenu a').on('click', function(event) {
+					var href = $(this).attr('href') || '';
+					var match = href.match(/[?&]tab=([^&]+)/);
+					var tab = match ? decodeURIComponent(match[1]) : '';
+
+					if (tabs.indexOf(tab) === -1) {
+						return;
+					}
+
+					event.preventDefault();
+					showTab(tab);
+				});
+
+				showTab('<?php echo esc_js($tab); ?>');
+			});
+		</script>
+		<?php
+	}
+	function get_media_funders() {
+		if ( $this->media_funders === null ) {
+			$this->media_funders = get_posts(array(
+				'post_type' => 'funder',
+				'numberposts' => -1,
+				'post_status' => 'publish',
+			));
+		}
+
+		return $this->media_funders;
 	}
 	function media_buttons($context) {
 		global $typenow, $pagenow, $post;
@@ -1661,15 +1729,12 @@ class WDF {
 			echo '<a title="'.__('Füge Fundraising-Shortcodes ein','wdf').'" class="thickbox button add_media" id="add_wdf" href="'.admin_url('media-upload.php?post_id='.$post->ID).'&tab=donate_button&TB_iframe=1&wdf=1"><img onclick="return false;" alt="'.__('Füge Fundraising-Shortcodes ein','wdf').'" src="'.WDF_PLUGIN_URL.'/img/sm_ico.png"></a>';
 		}
 	}
-	function media_progress_bar_iframe() {
+	function media_progress_bar_iframe($include_header = true) {
 		$settings = get_option('wdf_settings');
-		$args = array(
-			'post_type' => 'funder',
-			'numberposts' => -1,
-			'post_status' => 'publish'
-		);
-		$funders = get_posts($args);
-		media_upload_header(); ?>
+		$funders = $this->get_media_funders();
+		if ( $include_header ) {
+			media_upload_header();
+		} ?>
 		<form class="wdf_media_cont media-item" id="media_progress_bar">
 			<h3 class="media-title"><?php _e('Füge einen Fortschrittsbalken hinzu','wdf'); ?></h3>
 			<span class="description"><?php _e('Nur Spendenaktionen, die ein Ziel haben, können einen Fortschrittsbalken anzeigen','wdf'); ?></span>
@@ -1729,9 +1794,11 @@ class WDF {
 
 		<?php
 	}
-	function media_donate_button_iframe () {
+	function media_donate_button_iframe($include_header = true) {
 		$settings = get_option('wdf_settings');
-		media_upload_header(); ?>
+		if ( $include_header ) {
+			media_upload_header();
+		} ?>
 		<style type="text/css">
 			.wdf_button_type { display:none; }
 			table.describe th.label { width:150px; }
@@ -1817,16 +1884,13 @@ class WDF {
 		</form>
 		<?php
 	}
-	function media_fundraiser_iframe() {
+	function media_fundraiser_iframe($include_header = true) {
 			$content = '';
 			$settings = get_option('wdf_settings');
-			$args = array(
-				'post_type' => 'funder',
-				'numberposts' => -1,
-				'post_status' => 'publish'
-			);
-			$funders = get_posts($args);
-			media_upload_header();?>
+			$funders = $this->get_media_funders();
+			if ( $include_header ) {
+				media_upload_header();
+			}?>
 			<form class="wdf_media_cont media-item" id="media_fundraising">
 			<h3 class="media-title"><?php printf(__('Ein %s Formular hinzufügen','wdf'), $settings['funder_labels']['singular_name']); ?></h3>
 
@@ -1883,16 +1947,13 @@ class WDF {
 
 			</form><?php
 	}
-	function media_pledges_iframe() {
+	function media_pledges_iframe($include_header = true) {
 			$content = '';
 			$settings = get_option('wdf_settings');
-			$args = array(
-				'post_type' => 'funder',
-				'numberposts' => -1,
-				'post_status' => 'publish'
-			);
-			$funders = get_posts($args);
-			media_upload_header();?>
+			$funders = $this->get_media_funders();
+			if ( $include_header ) {
+				media_upload_header();
+			}?>
 			<form class="wdf_media_cont media-item" id="media_pledges">
 			<h3 class="media-title"><?php printf(__('Liste von %s hinzufügen','wdf'), $settings['donation_labels']['plural_name']); ?></h3>
 

@@ -1,7 +1,7 @@
 function wdf_inject_shortcode () {
 	
 	var iFrame = jQuery('#TB_iframeContent').contents();
-	var cont = iFrame.find('.wdf_media_cont:first');
+	var cont = iFrame.find('.wdf_media_cont.is-active:first');
 	var type = cont.attr('id');
 	var form = cont.serializeArray();
 

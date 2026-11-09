@@ -22,6 +22,7 @@ Mit **PS Fundraising** organisierst Du Spendenaktionen und Crowdfunding direkt a
 - **Ausstehende Überweisungen:** Manuelle Zahlungen bleiben zunächst „Ausstehend“ und werden nach Zahlungseingang von Dir bestätigt.
 - **SEPA-QR-Code:** Für EUR-Überweisungen kann ein EPC-QR-Code direkt auf der Website erzeugt werden. Die QR-Erzeugung erfolgt lokal.
 - **Einbindung nach Wunsch:** Verwende Shortcodes, Widgets oder Theme-Vorlagen.
+- **Schneller Shortcode-Dialog:** Wechsle zwischen Einfügeoptionen ohne erneutes Laden des Dialogs.
 - **BuddyPress-Integration:** Ergänze Deine Community um gemeinschaftliches Fundraising.
 - **PS Community-Integration:** Zeige Kampagnen und eigene Unterstützungen in Community-Profilen; eingeloggte Unterstützer können Aktivitäten freiwillig veröffentlichen.
 - **Ein responsives Kampagnendesign:** Kennzahlen stehen nebeneinander und passen sich kleineren Bildschirmen an.
