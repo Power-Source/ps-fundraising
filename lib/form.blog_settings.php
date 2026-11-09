@@ -218,6 +218,30 @@ if (!class_exists('Psource_HelpTooltips')) require_once WDF_PLUGIN_BASE_DIR . '/
 
 									<tr valign="top">
 										<th scope="row">
+											<label><?php _e('Anzahl Unterstützer anzeigen','wdf'); ?></label>
+										</th>
+										<td>
+											<select name="wdf_settings[show_backers]">
+												<option value="yes" <?php selected(isset($settings['show_backers']) ? $settings['show_backers'] : 'yes','yes') ?>><?php _e('Ja','wdf'); ?></option>
+												<option value="no" <?php selected(isset($settings['show_backers']) ? $settings['show_backers'] : 'yes','no') ?>><?php _e('Nein','wdf'); ?></option>
+											</select><?php echo $tips->add_tip(__('Gilt für alle Spendenfelder. Im Shortcode lässt sich dies mit show_backers="yes/no" überschreiben.','wdf')); ?>
+										</td>
+									</tr>
+
+									<tr valign="top">
+										<th scope="row">
+											<label><?php _e('Insgesamt erhaltenen Betrag anzeigen','wdf'); ?></label>
+										</th>
+										<td>
+											<select name="wdf_settings[show_raised]">
+												<option value="yes" <?php selected(isset($settings['show_raised']) ? $settings['show_raised'] : 'yes','yes') ?>><?php _e('Ja','wdf'); ?></option>
+												<option value="no" <?php selected(isset($settings['show_raised']) ? $settings['show_raised'] : 'yes','no') ?>><?php _e('Nein','wdf'); ?></option>
+											</select><?php echo $tips->add_tip(__('Gilt für alle Spendenfelder. Im Shortcode lässt sich dies mit show_raised="yes/no" überschreiben.','wdf')); ?>
+										</td>
+									</tr>
+
+									<tr valign="top">
+										<th scope="row">
 											<label><?php _e('Per Spendenaktion Stile zulassen','wdf'); ?></label>
 										</th>
 										<td>

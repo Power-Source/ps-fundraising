@@ -5,6 +5,8 @@ if(!class_exists('WDF_Gateway_Manual')) {
 		// Private gateway slug. Lowercase alpha (a-z) and dashes (-) only please!
 		public $plugin_name = 'manual';
 
+		private $mail_qr_png = '';
+
 		// Name of your gateway, for the admin side.
 		public $admin_name = '';
 
@@ -118,6 +120,7 @@ if(!class_exists('WDF_Gateway_Manual')) {
 
 
 					$wdf->update_pledge( $pledge_id, $funder_id, $status, $transaction);
+					$this->send_payment_instructions($funder_id, $transaction);
 
 					if(!headers_sent()) {
 						wp_redirect($this->return_url);
@@ -139,7 +142,7 @@ if(!class_exists('WDF_Gateway_Manual')) {
 		}
 		function confirm() {
 		}
-		function payment_info( $content, $transaction ) {
+		function payment_info( $content, $transaction, $context = 'web' ) {
 			$settings = get_option('wdf_settings');
 			$manual_settings = isset($settings['manual']) && is_array($settings['manual']) ? $settings['manual'] : array();
 			$account_name = isset($manual_settings['account_name']) ? $manual_settings['account_name'] : '';
@@ -195,15 +198,24 @@ if(!class_exists('WDF_Gateway_Manual')) {
 
 				if (is_readable(WDF_PLUGIN_BASE_DIR . '/lib/gateways/vendor/autoload.php')) {
 					require_once WDF_PLUGIN_BASE_DIR . '/lib/gateways/vendor/autoload.php';
-					$qr_options = new \chillerlan\QRCode\QROptions(array(
-						'outputType' => \chillerlan\QRCode\QRCode::OUTPUT_MARKUP_SVG,
-						'imageBase64' => true,
-						'scale' => 6,
-						'eccLevel' => \chillerlan\QRCode\QRCode::ECC_M,
-					));
-					$qr_code = (new \chillerlan\QRCode\QRCode($qr_options))->render($payload);
-					$content .= '<p class="manual_transaction_qr"><img src="' . esc_attr($qr_code) . '" width="240" height="240" alt="' . esc_attr__('SEPA-Überweisungs-QR-Code', 'wdf') . '" /><br />';
-					$content .= '<span>' . esc_html__('Mit der Banking-App scannen, um Empfänger, Betrag und Verwendungszweck zu übernehmen.', 'wdf') . '</span></p>';
+					if ('mail' === $context) {
+						$png = $this->render_qr_png($payload);
+						if ($png) {
+							$this->mail_qr_png = $png;
+							$content .= '<p><img src="cid:wdf-epc-qr" width="240" height="240" alt="' . esc_attr__('SEPA-Überweisungs-QR-Code', 'wdf') . '" /><br />';
+							$content .= '<span>' . esc_html__('Mit der Banking-App scannen, um Empfänger, Betrag und Verwendungszweck zu übernehmen.', 'wdf') . '</span></p>';
+						}
+					} else {
+						$qr_options = new \chillerlan\QRCode\QROptions(array(
+							'outputType' => \chillerlan\QRCode\QRCode::OUTPUT_MARKUP_SVG,
+							'imageBase64' => true,
+							'scale' => 6,
+							'eccLevel' => \chillerlan\QRCode\QRCode::ECC_M,
+						));
+						$qr_code = (new \chillerlan\QRCode\QRCode($qr_options))->render($payload);
+						$content .= '<p class="manual_transaction_qr"><img src="' . esc_attr($qr_code) . '" width="240" height="240" alt="' . esc_attr__('SEPA-Überweisungs-QR-Code', 'wdf') . '" /><br />';
+						$content .= '<span>' . esc_html__('Mit der Banking-App scannen, um Empfänger, Betrag und Verwendungszweck zu übernehmen.', 'wdf') . '</span></p>';
+					}
 				}
 			}
 
@@ -213,6 +225,67 @@ if(!class_exists('WDF_Gateway_Manual')) {
 			}
 			$content .= '</div>';
 			return $content;
+		}
+
+		// Mailclients blockieren SVG und data:-URIs, daher wird ein PNG als eingebettetes Bild (CID) erzeugt.
+		private function render_qr_png($payload) {
+			if (!function_exists('gzcompress')) {
+				return '';
+			}
+			$matrix = (new \chillerlan\QRCode\QRCode(new \chillerlan\QRCode\QROptions(array('eccLevel' => \chillerlan\QRCode\QRCode::ECC_M))))->getMatrix($payload)->matrix(true);
+			$modules = count($matrix);
+			$scale = 6;
+			$quiet = 4;
+			$size = ($modules + 2 * $quiet) * $scale;
+			$raw = '';
+			for ($y = 0; $y < $size; $y++) {
+				$my = intdiv($y, $scale) - $quiet;
+				$row = '';
+				for ($x = 0; $x < $size; $x++) {
+					$mx = intdiv($x, $scale) - $quiet;
+					$dark = $my >= 0 && $my < $modules && $mx >= 0 && $mx < $modules && !empty($matrix[$my][$mx]);
+					$row .= $dark ? "\x00" : "\xFF";
+				}
+				$raw .= "\x00" . $row;
+			}
+			$chunk = function ($type, $data) {
+				return pack('N', strlen($data)) . $type . $data . pack('N', crc32($type . $data));
+			};
+			return "\x89PNG\r\n\x1a\n"
+				. $chunk('IHDR', pack('NNCCCCC', $size, $size, 8, 0, 0, 0, 0))
+				. $chunk('IDAT', gzcompress($raw, 9))
+				. $chunk('IEND', '');
+		}
+
+		public function send_payment_instructions($funder_id, $transaction) {
+			if (empty($transaction['payer_email']) || !is_email($transaction['payer_email'])) {
+				return false;
+			}
+			$this->mail_qr_png = '';
+			$info = $this->payment_info('', $transaction, 'mail');
+			$info = preg_replace('/<h3>.*?<\/h3>/s', '', $info, 1);
+			$name = trim((isset($transaction['first_name']) ? $transaction['first_name'] : ''));
+			$intro = '<p>' . sprintf(esc_html__('Hallo %s, vielen Dank für Deine Unterstützung von „%s“. Deine Zahlung ist noch ausstehend. Bitte überweise den Betrag mit diesen Daten:', 'wdf'), esc_html($name), esc_html(get_the_title($funder_id))) . '</p>';
+			$image = '';
+			if (has_post_thumbnail($funder_id)) {
+				$url = get_the_post_thumbnail_url($funder_id, 'large');
+				if ($url) {
+					$image = '<p><a href="' . esc_url(get_permalink($funder_id)) . '"><img src="' . esc_url($url) . '" alt="' . esc_attr(get_the_title($funder_id)) . '" style="max-width:100%;height:auto;border:0;" /></a></p>';
+				}
+			}
+			$body = '<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;">' . $image . $intro . $info . '</body></html>';
+			$subject = sprintf(__('Deine Überweisungsdaten für „%s“ – Zahlung ausstehend', 'wdf'), html_entity_decode(get_the_title($funder_id), ENT_QUOTES));
+
+			$qr = $this->mail_qr_png;
+			$attach = function ($phpmailer) use ($qr) {
+				if ($qr) {
+					$phpmailer->addStringEmbeddedImage($qr, 'wdf-epc-qr', 'sepa-qr.png', 'base64', 'image/png');
+				}
+			};
+			add_action('phpmailer_init', $attach);
+			$sent = wp_mail($transaction['payer_email'], $subject, $body, array('Content-Type: text/html; charset=UTF-8'));
+			remove_action('phpmailer_init', $attach);
+			return $sent;
 		}
 
 		private function get_payment_reference($pledge_id, $settings) {

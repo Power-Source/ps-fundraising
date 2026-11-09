@@ -28,11 +28,13 @@
 					<li>
 						<h4><strong><?php _e('Spendenaktion Panel','wdf'); ?></strong></h4>
 						<p class="description"><?php _e('Das Spendenfeld zeigt relevante Informationen zu einer bestimmten Spendenaktion an, z.B.: Gesamte Aktionen, Zielinformationen und Links zur Checkout-Seite für Versprechen.','wdf'); ?></p>
-						<code>[fundraiser_panel id="" style="" show_title="" show_content=""]</code>
+						<code>[fundraiser_panel id="" style="" show_title="" show_content="" show_backers="yes/no" show_raised="yes/no"]</code>
 						<p class="attr_description">id: <span class="description"><?php _e('Die ID der Spendenaktion, die Du anzeigen möchtest','wdf'); ?></span></p>
 						<p class="attr_description">style: <span class="description"><?php _e('Ein gültiger geladener Stilname. Dies verwendet den Standard-Spendenstil, wenn kein Stil angegeben ist.','wdf'); ?></span></p>
 						<p class="attr_description">show_title: <span class="description"><?php _e('(yes/no) Zeigt den Titel der Spendenaktion über dem Panel an','wdf'); ?></span></p>
 						<p class="attr_description">show_content: <span class="description"><?php _e('(yes/no) Zeigt den Post-Inhalt der Spendenaktion über dem Panel an','wdf'); ?></span></p>
+						<p class="attr_description">show_backers: <span class="description"><?php _e('(yes/no) Zeigt die Anzahl der Unterstützer an. Überschreibt die globale Einstellung. - Standard: Einstellung','wdf'); ?></span></p>
+						<p class="attr_description">show_raised: <span class="description"><?php _e('(yes/no) Zeigt den insgesamt erhaltenen Betrag an. Überschreibt die globale Einstellung. - Standard: Einstellung','wdf'); ?></span></p>
 					</li>
 					<li>
 						<h4><strong><?php _e('Einfache Spendenschaltfläche','wdf'); ?></strong></h4>

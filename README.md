@@ -70,6 +70,12 @@ Zeige eine Kampagne mit ihrer ID an:
 [fundraiser_panel id="123"]
 ```
 
+Unterstützerzahl und erhaltenen Betrag ein- oder ausblenden (überschreibt die globale Einstellung unter *Einstellungen → Stil*):
+
+```text
+[fundraiser_panel id="123" show_backers="no" show_raised="yes"]
+```
+
 Zeige die Unterstützungen einer Kampagne:
 
 ```text

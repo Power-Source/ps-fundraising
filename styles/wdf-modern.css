@@ -30,6 +30,10 @@
     gap: 1rem;
 }
 
+.wdf-modern .wdf_campaign_stats_single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .wdf-modern .wdf_campaign_stats .wdf_stat_card {
     display: flex;
     min-width: 0;

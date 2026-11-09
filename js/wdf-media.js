@@ -12,6 +12,8 @@ function wdf_inject_shortcode () {
 			var shortcode = '[fundraiser_panel';
 		
 			jQuery.each(form, function(i,e) { 
+				if((e.name == 'show_backers' || e.name == 'show_raised') && e.value == '')
+					return;
 				shortcode = shortcode + ' '+e.name+'="'+e.value+'"';
 			});
 			

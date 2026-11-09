@@ -87,17 +87,30 @@ if(!function_exists('wdf_fundraiser_panel')) {
 				$content .= sprintf( apply_filters( 'wdf_fundaiser_panel_shortcode_content', '<div class="wdf_shortcode_content">%s</div>'), $funder_content );
 			}
 		}
-		$content .= '<div class="wdf_campaign_stats">';
+		$show_backers = wdf_show_stat('show_backers', $args, $settings);
+		$show_raised = wdf_show_stat('show_raised', $args, $settings);
+		$has_goal = wdf_has_goal($post_id);
 
-		$backer_total = wdf_total_backers(false, $post_id);
-		$content .= '<div class="wdf_total_backers wdf_stat_card"><div class="wdf_big_num">'.$backer_total.'</div><p>'.apply_filters('wdf_backer_label', ($backer_total > 1 ? esc_attr($settings['donation_labels']['backer_plural']) : esc_attr($settings['donation_labels']['backer_single'])) ).'</p></div>';
-		if(wdf_has_goal($post_id)) {
-			$content .= '<div class="wdf_amount_raised wdf_stat_card"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.sprintf(__('insgesamt erhalten, von einem Ziel von %s','wdf'),wdf_goal(false, $post_id)).'</p></div>';
-			$content .= '<div class="wdf_panel_progress_bar">'.wdf_progress_bar(false, $post_id).'</div>';
-		} else {
-			$content .= '<div class="wdf_amount_raised wdf_stat_card"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.__('insgesamt erhalten','wdf').'</p></div>';
+		if($show_backers || $show_raised || $has_goal) {
+			$stats_class = ($show_backers && $show_raised) ? '' : ' wdf_campaign_stats_single';
+			$content .= '<div class="wdf_campaign_stats'.$stats_class.'">';
+
+			if($show_backers) {
+				$backer_total = wdf_total_backers(false, $post_id);
+				$content .= '<div class="wdf_total_backers wdf_stat_card"><div class="wdf_big_num">'.$backer_total.'</div><p>'.apply_filters('wdf_backer_label', ($backer_total > 1 ? esc_attr($settings['donation_labels']['backer_plural']) : esc_attr($settings['donation_labels']['backer_single'])) ).'</p></div>';
+			}
+			if($show_raised) {
+				if($has_goal) {
+					$content .= '<div class="wdf_amount_raised wdf_stat_card"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.sprintf(__('insgesamt erhalten, von einem Ziel von %s','wdf'),wdf_goal(false, $post_id)).'</p></div>';
+				} else {
+					$content .= '<div class="wdf_amount_raised wdf_stat_card"><div class="wdf_big_num">'.wdf_amount_raised(false, $post_id).'</div><p>'.__('insgesamt erhalten','wdf').'</p></div>';
+				}
+			}
+			if($has_goal) {
+				$content .= '<div class="wdf_panel_progress_bar">'.wdf_progress_bar(false, $post_id).'</div>';
+			}
+			$content .= '</div>';
 		}
-		$content .= '</div>';
 
 		// Checking to see if this fundraiser can accept pledges.
 		$fundraising_active = wdf_time_left(false, $post_id, true);
@@ -452,7 +465,15 @@ if(!function_exists('wdf_confirmation_page')) {
         global $wdf; $content = '';
         $settings = get_option('wdf_settings');
 
-        $pledge_id = (isset($_SESSION['wdf_pledge_id']) ? $_SESSION['wdf_pledge_id'] : (isset($_REQUEST['wdf_pledge_id']) ? $_REQUEST['wdf_pledge_id'] : ''));
+        $pledge_id = '';
+        foreach ( array( 'pledge_id', 'wdf_pledge_id' ) as $wdf_pledge_key ) {
+            if ( empty($pledge_id) && !empty($_REQUEST[$wdf_pledge_key]) ) {
+                $pledge_id = sanitize_text_field( wp_unslash( $_REQUEST[$wdf_pledge_key] ) );
+            }
+        }
+        if ( empty($pledge_id) && !empty($_SESSION['wdf_pledge_id']) ) {
+            $pledge_id = sanitize_text_field( $_SESSION['wdf_pledge_id'] );
+        }
         if(empty($post_id)) {
             global $post;
             $post_id = $post->ID;
@@ -463,7 +484,7 @@ if(!function_exists('wdf_confirmation_page')) {
             $pledge_query = new WP_Query([
                 'post_type'      => 'donation',
                 'title'          => $pledge_id,
-                'post_status'    => 'any',
+                'post_status'    => array('wdf_pending', 'wdf_complete', 'wdf_approved', 'wdf_canceled', 'wdf_refunded', 'publish'),
                 'posts_per_page' => 1,
             ]);
             $pledge = $pledge_query->have_posts() ? $pledge_query->posts[0] : false;
@@ -477,8 +498,9 @@ if(!function_exists('wdf_confirmation_page')) {
 
                 $content .= wdf_thanks_panel( false, $post_id, $transaction );
 
-                if(isset($_SESSION['wdf_gateway'])) {
-                    $content .= '<div class="wdf_gateway_payment_info">'.apply_filters('wdf_gateway_payment_info_'.$_SESSION['wdf_gateway'], '', $transaction).'</div>';
+                $payment_gateway = !empty($transaction['gateway']) ? sanitize_key($transaction['gateway']) : (isset($_SESSION['wdf_gateway']) ? sanitize_key($_SESSION['wdf_gateway']) : '');
+                if ( $payment_gateway ) {
+                    $content .= '<div class="wdf_gateway_payment_info">'.apply_filters('wdf_gateway_payment_info_'.$payment_gateway, '', $transaction).'</div>';
                 }
             } else {
                 $message_waiting = sprintf( __('Wir warten auf Deine Zahlung','wdf'), esc_attr($settings['donation_labels']['singular_name']), esc_attr($settings['donation_labels']['singular_name']) );
@@ -508,7 +530,11 @@ if(!function_exists('wdf_thanks_panel')) {
 		if($funder = get_post($post_id) && !empty($trans)) {
             $amount = isset($trans['recurring']) ? $trans['recurring_amount'] : $trans['gross'];
             $content .= '<div class="wdf_thanks_panel">';
-            $content .= '<h3 class="wdf_confirm_pledge_amount">' . sprintf(__('Deine %s von %s war erfolgreich','wdf'), esc_attr($settings['donation_labels']['singular_name']), $wdf->format_currency($trans['currency_code'],$amount) ) . '</h3>';
+            if ( isset($trans['gateway']) && 'manual' === $trans['gateway'] ) {
+                $content .= '<h3 class="wdf_confirm_pledge_amount">' . sprintf(__('Deine %s von %s ist vorgemerkt','wdf'), esc_attr($settings['donation_labels']['singular_name']), $wdf->format_currency($trans['currency_code'],$amount) ) . '</h3>';
+            } else {
+                $content .= '<h3 class="wdf_confirm_pledge_amount">' . sprintf(__('Deine %s von %s war erfolgreich','wdf'), esc_attr($settings['donation_labels']['singular_name']), $wdf->format_currency($trans['currency_code'],$amount) ) . '</h3>';
+            }
 			$content .= '<h3 class="wdf_left_to_go">';
 			if(!wdf_has_goal($post_id))
 				$content .= sprintf(__('%s bisher erhalten','wdf'), wdf_amount_raised(false, $post_id));

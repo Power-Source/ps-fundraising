@@ -68,6 +68,12 @@ Display a campaign by its ID:
 [fundraiser_panel id="123"]
 ```
 
+Show or hide the supporter count and the total raised (overrides the global setting under *Settings → Style*):
+
+```text
+[fundraiser_panel id="123" show_backers="no" show_raised="yes"]
+```
+
 Display a campaign’s contributions:
 
 ```text

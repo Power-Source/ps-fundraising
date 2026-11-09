@@ -217,6 +217,11 @@ Erstelle eine CSS-Datei und speichere sie im `/styles/` Ordner oder in `wp-conte
 * Stripe-Checkout und Webhook-Verarbeitung für erfolgreiche und unbezahlte Zahlungen vervollständigt.
 * PHP-8-Kompatibilität verbessert, unter anderem durch explizite Deklaration zuvor dynamischer Eigenschaften und Korrekturen an Status- und Prämienübergängen.
 * PHP- und Plattformanforderungen aktualisiert; Regressionstests für die Zahlungsabläufe ergänzt.
+* Fix: Bestätigungsseite fand ausstehende Überweisungen nicht (Status „Ausstehend“ wurde von der Suche ausgeschlossen); Zahlungsdaten werden jetzt angezeigt.
+* Fix: Dankes-E-Mail wird erst bei Zahlungseingang (Status „Komplett“/„Genehmigt“) und nur einmal versendet.
+* Dankes-E-Mail wird als HTML mit Beitragsbild der Spendenaktion versendet.
+* Neu: Anzahl der Unterstützer und insgesamt erhaltener Betrag lassen sich in den Einstellungen sowie per Shortcode (`show_backers`/`show_raised` = yes/no) ein- und ausblenden.
+* Neu: Bei Überweisungen erhält der Spender sofort eine E-Mail „Zahlung ausstehend“ mit Bankdaten, Verwendungszweck und eingebettetem EPC-QR-Code.
 
 = 1.0.0 =
 * Release

@@ -62,6 +62,14 @@ namespace {
     }
 
     function add_action() {}
+    function remove_action() {}
+    function is_email($email) { return false !== strpos($email, '@'); }
+    function has_post_thumbnail() { return false; }
+    function get_the_title() { return 'Demo Campaign'; }
+    function wp_mail($to, $subject, $body, $headers = array()) {
+        $GLOBALS['wdf_test_mails'][] = compact('to', 'subject', 'body', 'headers');
+        return true;
+    }
     function add_shortcode() {}
     function remove_filter() {}
     function wdf_register_gateway_plugin() {}
@@ -146,6 +154,11 @@ namespace {
 
     assert_same('wdf-modern', wdf_normalize_style('wdf-note'), 'Legacy fundraiser styles use the modern layout');
     assert_same('wdf-modern', wdf_normalize_style('wdf-modern'), 'Modern fundraiser style remains selected');
+    assert_same(true, wdf_show_stat('show_backers', array(), array()), 'Stats are shown by default');
+    assert_same(false, wdf_show_stat('show_backers', array(), array('show_backers' => 'no')), 'Global setting hides backers');
+    assert_same(true, wdf_show_stat('show_raised', array('show_raised' => 'YES'), array('show_raised' => 'no')), 'Shortcode yes overrides global no');
+    assert_same(false, wdf_show_stat('show_raised', array('show_raised' => 'no'), array('show_raised' => 'yes')), 'Shortcode no overrides global yes');
+    assert_same(true, wdf_show_stat('show_raised', array('show_raised' => ''), array()), 'Empty shortcode attribute falls back to the setting');
 
     class VerifiedPayPalGateway extends \WDF_Gateway_PayPal {
         public function verify_paypal() {
@@ -263,6 +276,11 @@ namespace {
     assert_same(true, strpos($manual_info, 'data:image/svg+xml;base64,') !== false, 'Valid bank details produce a local SVG EPC QR');
     assert_same(true, strpos($manual_info, 'DE89370400440532013000') !== false, 'Transfer details include the normalized IBAN');
     assert_same(true, strpos($manual_info, 'Spende pledge-test-123') !== false, 'Transfer details include the unique reference');
+    $mail = $GLOBALS['wdf_test_mails'][0] ?? array();
+    assert_same('donor@example.test', $mail['to'] ?? '', 'Pending transfer sends payment instructions to the donor');
+    assert_same(true, strpos($mail['body'] ?? '', 'DE89370400440532013000') !== false, 'Instruction mail contains the IBAN');
+    assert_same(true, strpos($mail['body'] ?? '', 'Spende pledge-test-123') !== false, 'Instruction mail contains the reference');
+    assert_same(true, strpos($mail['body'] ?? '', 'cid:wdf-epc-qr') !== false, 'Instruction mail embeds the QR code as a PNG attachment');
     echo "Manual transfer and EPC QR flow tests passed.\n";
 
     $test_options['wdf_settings']['paypal'] = array();

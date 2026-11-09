@@ -144,6 +144,8 @@ class WDF {
 			'message_pledge_not_found' => '',
 			'first_time' => 1,
 			'default_style' => 'wdf-modern',
+			'show_backers' => 'yes',
+			'show_raised' => 'yes',
 			'panel_in_sidebar' => 'no',
 			'payment_types' => array('simple'),
 			'curr_symbol_position' => 1,
@@ -240,6 +242,7 @@ class WDF {
 			add_action( 'media_upload_progress_bar', array(&$this,'media_progress_bar'));
 			add_action( 'wp_update_post', array(&$this,'wp_insert_post') );
 			add_action( 'wp_insert_post', array(&$this,'wp_insert_post') );
+			add_action( 'transition_post_status', array(&$this,'maybe_send_thank_you_on_payment'), 10, 3 );
 			add_action( 'before_delete_post', array(&$this,'before_delete_post') );
 
 			// Add Admin Only Filters
@@ -998,7 +1001,7 @@ class WDF {
 		$query = new WP_Query([
 			'post_type'      => 'donation',
 			'title'          => sanitize_text_field($_REQUEST['pledge_id']),
-			'post_status'    => 'any',
+			'post_status'    => array('wdf_pending', 'wdf_complete', 'wdf_approved', 'wdf_canceled', 'wdf_refunded', 'publish'),
 			'posts_per_page' => 1,
 			'fields'         => 'ids',
 		]);
@@ -1038,7 +1041,7 @@ class WDF {
     }
 	function create_thank_you($funder_id = false, $trans = false) {
 
-		if($send_email = get_post_meta($funder_id,'wdf_send_email',true) && $trans != false) {
+		if(get_post_meta($funder_id,'wdf_send_email',true) && $trans != false) {
 
 			//remove any other filters
 			//remove_all_filters( 'wp_mail_from' );
@@ -1055,10 +1058,42 @@ class WDF {
             $subject = $this->filter_thank_you($subject, $trans, 1, 'subject');
             $subject = html_entity_decode($subject, ENT_QUOTES);
 
-            if($subject && $msg && $trans['payer_email']) {
-                wp_mail($trans['payer_email'],$subject,$msg);
+            if($subject && $msg && !empty($trans['payer_email'])) {
+                $msg = $this->build_thank_you_html($msg, $funder_id);
+                wp_mail($trans['payer_email'],$subject,$msg,array('Content-Type: text/html; charset=UTF-8'));
             }
 		}
+	}
+	function build_thank_you_html($msg, $funder_id) {
+		$msg = wp_kses_post(wpautop($msg));
+		$image = '';
+		if ( has_post_thumbnail($funder_id) ) {
+			$url = get_the_post_thumbnail_url($funder_id, 'large');
+			if ( $url ) {
+				$image = '<p><a href="' . esc_url(get_permalink($funder_id)) . '"><img src="' . esc_url($url) . '" alt="' . esc_attr(get_the_title($funder_id)) . '" style="max-width:100%;height:auto;border:0;" /></a></p>';
+			}
+		}
+		return '<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;font-size:15px;line-height:1.5;color:#222;">' . $image . $msg . '</body></html>';
+	}
+	function maybe_send_thank_you_on_payment($new_status, $old_status, $post) {
+		if ( empty($post->post_type) || 'donation' !== $post->post_type || $new_status === $old_status ) {
+			return;
+		}
+		if ( !in_array($new_status, array('wdf_complete', 'wdf_approved'), true) ) {
+			return;
+		}
+		$this->send_thank_you_once($post->ID, $post->post_parent);
+	}
+	function send_thank_you_once($donation_id, $funder_id) {
+		if ( !$donation_id || get_post_meta($donation_id, 'wdf_thanks_sent', true) ) {
+			return;
+		}
+		$trans = get_post_meta($donation_id, 'wdf_transaction', true);
+		if ( !is_array($trans) ) {
+			return;
+		}
+		update_post_meta($donation_id, 'wdf_thanks_sent', '1');
+		$this->create_thank_you($funder_id, $trans);
 	}
     function update_pledge( $post_title = false, $funder_id = false, $status = false, $transaction = false ) {
         if( !$post_title || !$funder_id || !$status || !$transaction ) {
@@ -1080,8 +1115,6 @@ class WDF {
             $donation['ID'] = $pledge_exists;
             $id = wp_update_post($donation);
         } else {
-            //First time to see this pledge lets do some thank you operations
-            $this->create_thank_you($funder_id,$transaction);
             $id = wp_insert_post($donation);
         }
 
@@ -1094,6 +1127,9 @@ class WDF {
         }
         update_post_meta($id, 'wdf_transaction', $transaction);
         update_post_meta($id,'wdf_native', '1');
+        if ( in_array($status, array('wdf_complete', 'wdf_approved'), true) ) {
+            $this->send_thank_you_once($id, $funder_id);
+        }
 		if ( !get_post_meta($id, 'wdf_ps_community_supporter_id', true) ) {
 			$supporter_id = !empty($transaction['ps_community_user_id']) ? absint($transaction['ps_community_user_id']) : get_current_user_id();
 			if ( $supporter_id ) {
@@ -1768,6 +1804,26 @@ class WDF {
 							<tr>
 								<th valign="top" scope="row" class="label"><span class="alignleft"><label><?php _e('Summen anzeigen','wdf'); ?></label></span></th>
 								<td><input type="checkbox" name="show_totals" value="yes" /></td>
+							</tr>
+							<tr>
+								<th valign="top" scope="row" class="label"><span class="alignleft"><label><?php _e('Anzahl Unterstützer anzeigen','wdf'); ?></label></span></th>
+								<td>
+									<select name="show_backers">
+										<option value=""><?php _e('Standard (Einstellungen)','wdf'); ?></option>
+										<option value="yes"><?php _e('Ja','wdf'); ?></option>
+										<option value="no"><?php _e('Nein','wdf'); ?></option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<th valign="top" scope="row" class="label"><span class="alignleft"><label><?php _e('Insgesamt erhalten anzeigen','wdf'); ?></label></span></th>
+								<td>
+									<select name="show_raised">
+										<option value=""><?php _e('Standard (Einstellungen)','wdf'); ?></option>
+										<option value="yes"><?php _e('Ja','wdf'); ?></option>
+										<option value="no"><?php _e('Nein','wdf'); ?></option>
+									</select>
+								</td>
 							</tr>
 							<tr>
 								<th valign="top" scope="row" class="label"><span class="alignleft"><label><?php _e('Wähle einen Stil','wdf'); ?></label></span></th>
