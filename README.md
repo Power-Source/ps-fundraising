@@ -12,6 +12,8 @@
 
 Mit **PS Fundraising** organisierst Du Spendenaktionen und Crowdfunding direkt auf Deiner WordPress- oder ClassicPress-Website. Lege Kampagnen mit Finanzierungszielen und Prämien an, zeige den Fortschritt transparent und verwalte Unterstützungen zentral im Adminbereich.
 
+Die ausführliche deutschsprachige Anleitung mit Screenshots findest Du unter
+[docs/handbuch.md](docs/handbuch.md).
 
 ## Das steckt drin
 

@@ -1,4 +1,7 @@
 {
+    "config": {
+        "autoloader-suffix": "PSFundraisingGateways"
+    },
     "require": {
         "stripe/stripe-php": "^17.3",
         "chillerlan/php-qrcode": "^4.3",

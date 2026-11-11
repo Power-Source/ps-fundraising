@@ -4,10 +4,10 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit40aa654f2e66c20881ae0572fe987a10
+class ComposerStaticInitPSFundraisingGateways
 {
     public static $prefixLengthsPsr4 = array (
-        'c' =>
+        'c' => 
         array (
             'chillerlan\\Settings\\' => 20,
             'chillerlan\\QRCode\\' => 18,
@@ -19,11 +19,11 @@ class ComposerStaticInit40aa654f2e66c20881ae0572fe987a10
     );
 
     public static $prefixDirsPsr4 = array (
-        'chillerlan\\Settings\\' =>
+        'chillerlan\\Settings\\' => 
         array (
             0 => __DIR__ . '/..' . '/chillerlan/php-settings-container/src',
         ),
-        'chillerlan\\QRCode\\' =>
+        'chillerlan\\QRCode\\' => 
         array (
             0 => __DIR__ . '/..' . '/chillerlan/php-qrcode/src',
         ),
@@ -40,9 +40,9 @@ class ComposerStaticInit40aa654f2e66c20881ae0572fe987a10
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit40aa654f2e66c20881ae0572fe987a10::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit40aa654f2e66c20881ae0572fe987a10::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit40aa654f2e66c20881ae0572fe987a10::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitPSFundraisingGateways::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitPSFundraisingGateways::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitPSFundraisingGateways::$classMap;
 
         }, null, ClassLoader::class);
     }

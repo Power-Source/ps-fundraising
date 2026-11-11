@@ -12,6 +12,12 @@ title: "PS Fundraising"
 
 **Erstelle Spendenbuttons, komplexe Crowdfundingkampagnen oder lasse Deine Besucher Deine Projekte unterstützen.**
 
+## Dokumentation
+
+Die ausführliche Anleitung zu Einrichtung, Spendenaktionen, Zahlungsarten,
+Unterstützungen, Shortcodes sowie Single-Site und Multisite findest Du im
+[PS Fundraising Handbuch](handbuch.md).
+
 ## Crowdfunding für Dein nächstes Projekt mit Finanzierungszielen und Belohnungspaketen oder Erstellen einer einzelnen Spendenseite mit wiederkehrenden Zahlungsoptionen.
 
 ![fundit-home-735x470](assets/images/fundraising-home-735x470-583x372.jpeg) 

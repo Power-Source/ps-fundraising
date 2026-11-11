@@ -211,6 +211,7 @@ Erstelle eine CSS-Datei und speichere sie im `/styles/` Ordner oder in `wp-conte
 * Shortcode-Dialog optimiert: Alle Einfügeformulare werden einmal geladen; Tabwechsel erfolgen ohne erneuten Server-Request.
 
 = 1.0.1 =
+* Fix: Eigene Composer-Autoloader-Kennung verhindert einen Klassenkonflikt mit PS Bloghosting beim Laden der Gateway-Bibliotheken.
 * Überweisungsgateway überarbeitet: Bankverbindung und Verwendungszweck lassen sich konfigurieren; auf der Bestätigungsseite werden die Zahlungsdaten angezeigt.
 * Überweisungen erhalten den Status „Ausstehend“ und werden erst nach Zahlungseingang als abgeschlossen gezählt.
 * EPC-/SEPA-QR-Codes werden lokal aus den Zahlungsdaten erzeugt, ohne Bankdaten an einen externen QR-Dienst zu senden.
